@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, X, CheckCircle, Trash2, Circle, ChevronDown, ChevronUp } from 'lucide-react';
+import { PlusCircle, X, CheckCircle, Trash2, Circle, ChevronDown, ChevronUp, Edit2, Save } from 'lucide-react';
 
 const initialCategories = [
   { id: 1, name: 'Produce' },
@@ -23,7 +23,7 @@ const GroceryListApp = () => {
   const [categories, setCategories] = useState(initialCategories);
   const [items, setItems] = useState([]);
   const [newItemName, setNewItemName] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Automatic');  // Default to Automatic
+  const [selectedCategory, setSelectedCategory] = useState('Automatic');
   const [predictedCategory, setPredictedCategory] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isAddingItem, setIsAddingItem] = useState(false);
@@ -33,20 +33,36 @@ const GroceryListApp = () => {
   const [openCategories, setOpenCategories] = useState(() => 
     initialCategories.reduce((acc, category) => ({ ...acc, [category.name]: true }), {})
   );
+  const [userHistory, setUserHistory] = useState([]);
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [editedCategoryName, setEditedCategoryName] = useState('');
 
   useEffect(() => {
     const savedItems = JSON.parse(localStorage.getItem('groceryItems')) || [];
     const savedCategoryUsage = JSON.parse(localStorage.getItem('categoryUsage')) || {};
+    const savedUserHistory = JSON.parse(localStorage.getItem('userHistory')) || [];
+    const savedCategories = JSON.parse(localStorage.getItem('categories')) || initialCategories;
     setItems(savedItems);
     setCategoryUsage(savedCategoryUsage);
+    setUserHistory(savedUserHistory);
+    setCategories(savedCategories);
   }, []);
 
   useEffect(() => {
     localStorage.setItem('groceryItems', JSON.stringify(items));
     localStorage.setItem('categoryUsage', JSON.stringify(categoryUsage));
-  }, [items, categoryUsage]);
+    localStorage.setItem('userHistory', JSON.stringify(userHistory));
+    localStorage.setItem('categories', JSON.stringify(categories));
+  }, [items, categoryUsage, userHistory, categories]);
 
-  // Function to get category from AI model when "Predict Category" button is pressed
+  useEffect(() => {
+    if (newItemName.length > 2) {
+      fetchPredictedCategory(newItemName);
+    } else {
+      setPredictedCategory('');
+    }
+  }, [newItemName]);
+
   const fetchPredictedCategory = async (itemName) => {
     if (!itemName) return;
     setIsLoading(true);
@@ -56,7 +72,7 @@ const GroceryListApp = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ itemName }),
+        body: JSON.stringify({ itemName, userHistory }),
       });
       const data = await response.json();
       setPredictedCategory(data.predictedCategory);
@@ -94,6 +110,8 @@ const GroceryListApp = () => {
         ...prevUsage,
         [categoryToUse]: (prevUsage[categoryToUse] || 0) + 1
       }));
+
+      setUserHistory(prevHistory => [...prevHistory, { item: newItemName, category: categoryToUse }]);
     }
   };
 
@@ -116,9 +134,16 @@ const GroceryListApp = () => {
   const toggleChecked = (itemId) => {
     setItems(prevItems =>
       prevItems.map(item =>
-        item.id === itemId ? { ...item, checked: !item.checked } : item
+        item.id === itemId 
+          ? { ...item, checked: !item.checked } 
+          : item
       )
     );
+
+    // Remove item after a short delay
+    setTimeout(() => {
+      setItems(prevItems => prevItems.filter(item => item.id !== itemId));
+    }, 500); // 500ms delay
   };
 
   const removeItem = (itemId) => {
@@ -132,22 +157,92 @@ const GroceryListApp = () => {
     }));
   };
 
+  const startEditingCategory = (categoryId, categoryName) => {
+    setEditingCategory(categoryId);
+    setEditedCategoryName(categoryName);
+  };
+
+  const saveEditedCategory = (categoryId) => {
+    if (editedCategoryName.trim() !== '') {
+      setCategories(prevCategories =>
+        prevCategories.map(category =>
+          category.id === categoryId ? { ...category, name: editedCategoryName.trim() } : category
+        )
+      );
+
+      // Update items with the new category name
+      setItems(prevItems =>
+        prevItems.map(item =>
+          item.category === categories.find(c => c.id === categoryId).name
+            ? { ...item, category: editedCategoryName.trim() }
+            : item
+        )
+      );
+
+      // Update categoryUsage with the new category name
+      setCategoryUsage(prevUsage => {
+        const oldCategoryName = categories.find(c => c.id === categoryId).name;
+        const { [oldCategoryName]: oldUsage, ...rest } = prevUsage;
+        return {
+          ...rest,
+          [editedCategoryName.trim()]: oldUsage || 0
+        };
+      });
+
+      // Update userHistory with the new category name
+      setUserHistory(prevHistory =>
+        prevHistory.map(entry =>
+          entry.category === categories.find(c => c.id === categoryId).name
+            ? { ...entry, category: editedCategoryName.trim() }
+            : entry
+        )
+      );
+
+      setEditingCategory(null);
+      setEditedCategoryName('');
+    }
+  };
+
   return (
     <div className="bg-black text-white min-h-screen p-4">
       <h1 className="text-3xl font-bold text-red-500 mb-4">Grocery</h1>
 
       {categories.map((category) => {
-        const categoryItems = items.filter(item => item.category === category.name);  // Filter items for the current category
-        if (categoryItems.length === 0) return null;  // Don't render the category if it's empty
+        const categoryItems = items.filter(item => item.category === category.name);
+        if (categoryItems.length === 0) return null;
 
         return (
           <div key={category.id} className="mb-4">
-            <div 
-              className="flex justify-between items-center cursor-pointer"
-              onClick={() => toggleCategory(category.name)}
-            >
-              <h2 className="text-xl font-semibold">{category.name}</h2>
-              {openCategories[category.name] ? <ChevronUp /> : <ChevronDown />}
+            <div className="flex justify-between items-center">
+              {editingCategory === category.id ? (
+                <input
+                  type="text"
+                  value={editedCategoryName}
+                  onChange={(e) => setEditedCategoryName(e.target.value)}
+                  className="bg-gray-800 text-white p-1 rounded mr-2"
+                />
+              ) : (
+                <h2 className="text-xl font-semibold">{category.name}</h2>
+              )}
+              <div className="flex items-center">
+                {editingCategory === category.id ? (
+                  <Save
+                    className="mr-2 cursor-pointer text-green-500"
+                    onClick={() => saveEditedCategory(category.id)}
+                  />
+                ) : (
+                  <Edit2
+                    className="mr-2 cursor-pointer text-yellow-500"
+                    onClick={() => startEditingCategory(category.id, category.name)}
+                  />
+                )}
+                <div
+                  className="cursor-pointer"
+                  onClick={() => toggleCategory(category.name)}
+                >
+                  {openCategories[category.name] ? <ChevronUp /> : <ChevronDown />}
+                </div>
+              </div>
             </div>
             {openCategories[category.name] && (
               <ul className="mt-2">
@@ -222,29 +317,15 @@ const GroceryListApp = () => {
             </div>
           )}
 
-          {selectedCategory === 'Automatic' && (
-            <>
-              <button 
-                onClick={() => fetchPredictedCategory(newItemName)} 
-                className="bg-blue-500 text-white p-2 rounded mb-2 w-full"
-                disabled={!newItemName}
-              >
-                Predict Category
-              </button>
-
-              {isLoading && <div className="text-white mt-2">Predicting category...</div>}
-
-              {predictedCategory && (
-                <div className="text-white mt-2">Predicted Category: {predictedCategory}</div>
-              )}
-            </>
+          {selectedCategory === 'Automatic' && predictedCategory && (
+            <div className="text-white mt-2">Predicted Category: {predictedCategory}</div>
           )}
 
           <div className="flex justify-between">
             <button 
               onClick={addItem} 
               className="bg-red-500 text-white p-2 rounded"
-              disabled={isLoading || (!predictedCategory && selectedCategory === 'Automatic')}
+              disabled={!newItemName || (selectedCategory === 'Automatic' && !predictedCategory)}
             >
               Add Item
             </button>
