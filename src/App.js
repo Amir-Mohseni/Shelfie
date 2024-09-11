@@ -36,24 +36,30 @@ const GroceryListApp = () => {
   const [userHistory, setUserHistory] = useState([]);
   const [editingCategory, setEditingCategory] = useState(null);
   const [editedCategoryName, setEditedCategoryName] = useState('');
+  const [categoryUpdates, setCategoryUpdates] = useState({});
+  const [userId, setUserId] = useState('');
+  const [showUserModal, setShowUserModal] = useState(true);
+  const [newUserId, setNewUserId] = useState('');
 
   useEffect(() => {
-    const savedItems = JSON.parse(localStorage.getItem('groceryItems')) || [];
-    const savedCategoryUsage = JSON.parse(localStorage.getItem('categoryUsage')) || {};
-    const savedUserHistory = JSON.parse(localStorage.getItem('userHistory')) || [];
-    const savedCategories = JSON.parse(localStorage.getItem('categories')) || initialCategories;
+    const savedUserId = localStorage.getItem('userId');
+    if (savedUserId) {
+      setUserId(savedUserId);
+      setShowUserModal(false);
+      loadUserData(savedUserId);
+    }
+  }, []);
+
+  const loadUserData = (id) => {
+    const savedItems = JSON.parse(localStorage.getItem(`groceryItems_${id}`)) || [];
+    const savedCategoryUsage = JSON.parse(localStorage.getItem(`categoryUsage_${id}`)) || {};
+    const savedUserHistory = JSON.parse(localStorage.getItem(`userHistory_${id}`)) || [];
+    const savedCategories = JSON.parse(localStorage.getItem(`categories_${id}`)) || initialCategories;
     setItems(savedItems);
     setCategoryUsage(savedCategoryUsage);
     setUserHistory(savedUserHistory);
     setCategories(savedCategories);
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('groceryItems', JSON.stringify(items));
-    localStorage.setItem('categoryUsage', JSON.stringify(categoryUsage));
-    localStorage.setItem('userHistory', JSON.stringify(userHistory));
-    localStorage.setItem('categories', JSON.stringify(categories));
-  }, [items, categoryUsage, userHistory, categories]);
+  };
 
   useEffect(() => {
     if (newItemName.length > 2) {
@@ -62,7 +68,7 @@ const GroceryListApp = () => {
       setPredictedCategory('');
     }
   }, [newItemName]);
-
+  
   const fetchPredictedCategory = async (itemName) => {
     if (!itemName) return;
     setIsLoading(true);
@@ -72,7 +78,12 @@ const GroceryListApp = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ itemName, userHistory }),
+        body: JSON.stringify({ 
+          itemName, 
+          userHistory, 
+          userId, 
+          categoryUpdates 
+        }),
       });
       const data = await response.json();
       setPredictedCategory(data.predictedCategory);
@@ -84,15 +95,15 @@ const GroceryListApp = () => {
     }
   };
 
-  const addItem = () => {
+  const addItem = async () => {
     let categoryToUse = selectedCategory === 'Automatic' ? predictedCategory : selectedCategory;
-
-    if (newItemName && categoryToUse) {
+    
+    if (newItemName && (categoryToUse || selectedCategory === 'Automatic')) {
       if (!categories.find(category => category.name === categoryToUse)) {
         const newCategory = { id: Date.now(), name: categoryToUse };
         setCategories(prevCategories => [...prevCategories, newCategory]);
       }
-
+  
       const newItem = { 
         id: Date.now(), 
         name: newItemName, 
@@ -100,18 +111,44 @@ const GroceryListApp = () => {
         checked: false  
       };
       setItems(prevItems => [...prevItems, newItem]);
-
+  
       setNewItemName('');
       setSelectedCategory('Automatic');
       setPredictedCategory('');
       setIsAddingItem(false);
-
+  
       setCategoryUsage(prevUsage => ({
         ...prevUsage,
         [categoryToUse]: (prevUsage[categoryToUse] || 0) + 1
       }));
-
+  
       setUserHistory(prevHistory => [...prevHistory, { item: newItemName, category: categoryToUse }]);
+  
+      // Update localStorage after adding item
+      localStorage.setItem(`groceryItems_${userId}`, JSON.stringify([...items, newItem]));
+      localStorage.setItem(`categoryUsage_${userId}`, JSON.stringify({
+        ...categoryUsage,
+        [categoryToUse]: (categoryUsage[categoryToUse] || 0) + 1
+      }));
+      localStorage.setItem(`userHistory_${userId}`, JSON.stringify([...userHistory, { item: newItemName, category: categoryToUse }]));
+      localStorage.setItem(`categories_${userId}`, JSON.stringify(categories));
+  
+      // Send the new item data to the server when the user presses "Add Item"
+      try {
+        await fetch(`http://127.0.0.1:5000/saveItem`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            itemName: newItemName,
+            category: categoryToUse,
+            userId,
+          }),
+        });
+      } catch (error) {
+        console.error('Error sending data to server:', error);
+      }
     }
   };
 
@@ -140,10 +177,9 @@ const GroceryListApp = () => {
       )
     );
 
-    // Remove item after a short delay
     setTimeout(() => {
       setItems(prevItems => prevItems.filter(item => item.id !== itemId));
-    }, 500); // 500ms delay
+    }, 800);
   };
 
   const removeItem = (itemId) => {
@@ -164,48 +200,94 @@ const GroceryListApp = () => {
 
   const saveEditedCategory = (categoryId) => {
     if (editedCategoryName.trim() !== '') {
+      const oldCategoryName = categories.find(c => c.id === categoryId).name;
+      const newCategoryName = editedCategoryName.trim();
+
       setCategories(prevCategories =>
         prevCategories.map(category =>
-          category.id === categoryId ? { ...category, name: editedCategoryName.trim() } : category
+          category.id === categoryId ? { ...category, name: newCategoryName } : category
         )
       );
 
-      // Update items with the new category name
       setItems(prevItems =>
         prevItems.map(item =>
-          item.category === categories.find(c => c.id === categoryId).name
-            ? { ...item, category: editedCategoryName.trim() }
+          item.category === oldCategoryName
+            ? { ...item, category: newCategoryName }
             : item
         )
       );
 
-      // Update categoryUsage with the new category name
       setCategoryUsage(prevUsage => {
-        const oldCategoryName = categories.find(c => c.id === categoryId).name;
         const { [oldCategoryName]: oldUsage, ...rest } = prevUsage;
         return {
           ...rest,
-          [editedCategoryName.trim()]: oldUsage || 0
+          [newCategoryName]: oldUsage || 0
         };
       });
 
-      // Update userHistory with the new category name
       setUserHistory(prevHistory =>
         prevHistory.map(entry =>
-          entry.category === categories.find(c => c.id === categoryId).name
-            ? { ...entry, category: editedCategoryName.trim() }
+          entry.category === oldCategoryName
+            ? { ...entry, category: newCategoryName }
             : entry
         )
       );
+
+      setCategoryUpdates(prevUpdates => ({
+        ...prevUpdates,
+        [oldCategoryName]: newCategoryName
+      }));
 
       setEditingCategory(null);
       setEditedCategoryName('');
     }
   };
 
+  const handleUserIdSubmit = (e) => {
+    e.preventDefault();
+    if (newUserId) {
+      setUserId(newUserId);
+      localStorage.setItem('userId', newUserId);
+      setShowUserModal(false);
+      loadUserData(newUserId);
+    }
+  };
+
+  const createNewUserId = () => {
+    const newId = `user_${Date.now()}`;
+    setUserId(newId);
+    localStorage.setItem('userId', newId);
+    setShowUserModal(false);
+  };
+
+  if (showUserModal) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="bg-gray-800 p-6 rounded-lg">
+          <h2 className="text-xl font-bold mb-4">Enter User ID</h2>
+          <form onSubmit={handleUserIdSubmit} className="flex flex-col gap-4">
+            <input
+              type="text"
+              value={newUserId}
+              onChange={(e) => setNewUserId(e.target.value)}
+              placeholder="Enter your user ID"
+              className="bg-gray-700 text-white p-2 rounded"
+            />
+            <button type="submit" className="bg-red-500 text-white p-2 rounded">
+              Submit
+            </button>
+          </form>
+          <button onClick={createNewUserId} className="mt-4 text-red-500">
+            Create New User ID
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-black text-white min-h-screen p-4">
-      <h1 className="text-3xl font-bold text-red-500 mb-4">Grocery</h1>
+      <h1 className="text-3xl font-bold text-red-500 mb-4">Grocery List</h1>
 
       {categories.map((category) => {
         const categoryItems = items.filter(item => item.category === category.name);
