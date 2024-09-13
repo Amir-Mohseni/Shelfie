@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, X, CheckCircle, Trash2, Circle, ChevronDown, ChevronUp, Edit2, Save } from 'lucide-react';
+import {
+  PlusCircle,
+  X,
+  CheckCircle,
+  Trash2,
+  Circle,
+  ChevronDown,
+  ChevronUp,
+  Edit2,
+  Save,
+} from 'lucide-react';
 
 const initialCategories = [
   { id: 1, name: 'Produce' },
@@ -20,6 +30,7 @@ const initialCategories = [
 ];
 
 const GroceryListApp = () => {
+  // State variables for the main app functionality
   const [categories, setCategories] = useState(initialCategories);
   const [items, setItems] = useState([]);
   const [newItemName, setNewItemName] = useState('');
@@ -30,31 +41,41 @@ const GroceryListApp = () => {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [categoryUsage, setCategoryUsage] = useState({});
-  const [openCategories, setOpenCategories] = useState(() => 
+  const [openCategories, setOpenCategories] = useState(() =>
     initialCategories.reduce((acc, category) => ({ ...acc, [category.name]: true }), {})
   );
   const [userHistory, setUserHistory] = useState([]);
   const [editingCategory, setEditingCategory] = useState(null);
   const [editedCategoryName, setEditedCategoryName] = useState('');
   const [categoryUpdates, setCategoryUpdates] = useState({});
-  const [userId, setUserId] = useState('');
-  const [showUserModal, setShowUserModal] = useState(true);
-  const [newUserId, setNewUserId] = useState('');
+
+  // State variables for authentication
+  const [authToken, setAuthToken] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(true);
+  const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
+  const [authUsername, setAuthUsername] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authError, setAuthError] = useState('');
 
   useEffect(() => {
-    const savedUserId = localStorage.getItem('userId');
-    if (savedUserId) {
-      setUserId(savedUserId);
-      setShowUserModal(false);
-      loadUserData(savedUserId);
+    const savedToken = localStorage.getItem('authToken');
+    const savedUsername = localStorage.getItem('username');
+    if (savedToken && savedUsername) {
+      setAuthToken(savedToken);
+      setAuthUsername(savedUsername);
+      setShowAuthModal(false);
+      loadUserData(savedUsername);
     }
   }, []);
 
-  const loadUserData = (id) => {
-    const savedItems = JSON.parse(localStorage.getItem(`groceryItems_${id}`)) || [];
-    const savedCategoryUsage = JSON.parse(localStorage.getItem(`categoryUsage_${id}`)) || {};
-    const savedUserHistory = JSON.parse(localStorage.getItem(`userHistory_${id}`)) || [];
-    const savedCategories = JSON.parse(localStorage.getItem(`categories_${id}`)) || initialCategories;
+  const loadUserData = (username) => {
+    const savedItems = JSON.parse(localStorage.getItem(`groceryItems_${username}`)) || [];
+    const savedCategoryUsage =
+      JSON.parse(localStorage.getItem(`categoryUsage_${username}`)) || {};
+    const savedUserHistory =
+      JSON.parse(localStorage.getItem(`userHistory_${username}`)) || [];
+    const savedCategories =
+      JSON.parse(localStorage.getItem(`categories_${username}`)) || initialCategories;
     setItems(savedItems);
     setCategoryUsage(savedCategoryUsage);
     setUserHistory(savedUserHistory);
@@ -68,7 +89,47 @@ const GroceryListApp = () => {
       setPredictedCategory('');
     }
   }, [newItemName]);
-  
+
+  const handleAuthSubmit = async (e) => {
+    e.preventDefault();
+    if (!authUsername || !authPassword) {
+      setAuthError('Username and password are required.');
+      return;
+    }
+
+    try {
+      const url =
+        authMode === 'login'
+          ? 'http://127.0.0.1:5000/login'
+          : 'http://127.0.0.1:5000/signup';
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: authUsername, password: authPassword }),
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        if (authMode === 'signup') {
+          setAuthMode('login');
+          setAuthError('Signup successful! Please log in.');
+        } else {
+          const { access_token } = data;
+          setAuthToken(access_token);
+          localStorage.setItem('authToken', access_token);
+          localStorage.setItem('username', authUsername);
+          setShowAuthModal(false);
+          loadUserData(authUsername);
+        }
+      } else {
+        setAuthError(data.error || 'Authentication failed.');
+      }
+    } catch (error) {
+      console.error('Error during authentication:', error);
+      setAuthError('An error occurred during authentication.');
+    }
+  };
+
   const fetchPredictedCategory = async (itemName) => {
     if (!itemName) return;
     setIsLoading(true);
@@ -77,12 +138,10 @@ const GroceryListApp = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
         },
-        body: JSON.stringify({ 
-          itemName, 
-          userHistory, 
-          userId, 
-          categoryUpdates 
+        body: JSON.stringify({
+          itemName,
         }),
       });
       const data = await response.json();
@@ -96,54 +155,70 @@ const GroceryListApp = () => {
   };
 
   const addItem = async () => {
-    let categoryToUse = selectedCategory === 'Automatic' ? predictedCategory : selectedCategory;
-    
+    let categoryToUse =
+      selectedCategory === 'Automatic' ? predictedCategory : selectedCategory;
+
     if (newItemName && (categoryToUse || selectedCategory === 'Automatic')) {
-      if (!categories.find(category => category.name === categoryToUse)) {
+      if (!categories.find((category) => category.name === categoryToUse)) {
         const newCategory = { id: Date.now(), name: categoryToUse };
-        setCategories(prevCategories => [...prevCategories, newCategory]);
+        setCategories((prevCategories) => [...prevCategories, newCategory]);
       }
-  
-      const newItem = { 
-        id: Date.now(), 
-        name: newItemName, 
-        category: categoryToUse, 
-        checked: false  
+
+      const newItem = {
+        id: Date.now(),
+        name: newItemName,
+        category: categoryToUse,
+        checked: false,
       };
-      setItems(prevItems => [...prevItems, newItem]);
-  
+      setItems((prevItems) => [...prevItems, newItem]);
+
       setNewItemName('');
       setSelectedCategory('Automatic');
       setPredictedCategory('');
       setIsAddingItem(false);
-  
-      setCategoryUsage(prevUsage => ({
+
+      setCategoryUsage((prevUsage) => ({
         ...prevUsage,
-        [categoryToUse]: (prevUsage[categoryToUse] || 0) + 1
+        [categoryToUse]: (prevUsage[categoryToUse] || 0) + 1,
       }));
-  
-      setUserHistory(prevHistory => [...prevHistory, { item: newItemName, category: categoryToUse }]);
-  
+
+      setUserHistory((prevHistory) => [
+        ...prevHistory,
+        { item: newItemName, category: categoryToUse },
+      ]);
+
       // Update localStorage after adding item
-      localStorage.setItem(`groceryItems_${userId}`, JSON.stringify([...items, newItem]));
-      localStorage.setItem(`categoryUsage_${userId}`, JSON.stringify({
-        ...categoryUsage,
-        [categoryToUse]: (categoryUsage[categoryToUse] || 0) + 1
-      }));
-      localStorage.setItem(`userHistory_${userId}`, JSON.stringify([...userHistory, { item: newItemName, category: categoryToUse }]));
-      localStorage.setItem(`categories_${userId}`, JSON.stringify(categories));
-  
+      localStorage.setItem(
+        `groceryItems_${authUsername}`,
+        JSON.stringify([...items, newItem])
+      );
+      localStorage.setItem(
+        `categoryUsage_${authUsername}`,
+        JSON.stringify({
+          ...categoryUsage,
+          [categoryToUse]: (categoryUsage[categoryToUse] || 0) + 1,
+        })
+      );
+      localStorage.setItem(
+        `userHistory_${authUsername}`,
+        JSON.stringify([...userHistory, { item: newItemName, category: categoryToUse }])
+      );
+      localStorage.setItem(
+        `categories_${authUsername}`,
+        JSON.stringify(categories)
+      );
+
       // Send the new item data to the server when the user presses "Add Item"
       try {
         await fetch(`http://127.0.0.1:5000/saveItem`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify({
             itemName: newItemName,
             category: categoryToUse,
-            userId,
           }),
         });
       } catch (error) {
@@ -154,12 +229,14 @@ const GroceryListApp = () => {
 
   const addCategory = () => {
     if (newCategoryName) {
-      const existingCategory = categories.find(category => category.name.toLowerCase() === newCategoryName.toLowerCase());
+      const existingCategory = categories.find(
+        (category) => category.name.toLowerCase() === newCategoryName.toLowerCase()
+      );
       if (existingCategory) {
         setSelectedCategory(existingCategory.name);
       } else {
         const newCategory = { id: Date.now(), name: newCategoryName };
-        setCategories(prevCategories => [...prevCategories, newCategory]);
+        setCategories((prevCategories) => [...prevCategories, newCategory]);
         setSelectedCategory(newCategoryName);
       }
 
@@ -169,27 +246,25 @@ const GroceryListApp = () => {
   };
 
   const toggleChecked = (itemId) => {
-    setItems(prevItems =>
-      prevItems.map(item =>
-        item.id === itemId 
-          ? { ...item, checked: !item.checked } 
-          : item
+    setItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === itemId ? { ...item, checked: !item.checked } : item
       )
     );
 
     setTimeout(() => {
-      setItems(prevItems => prevItems.filter(item => item.id !== itemId));
+      setItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
     }, 800);
   };
 
   const removeItem = (itemId) => {
-    setItems(prevItems => prevItems.filter(item => item.id !== itemId));
+    setItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
   };
 
   const toggleCategory = (categoryName) => {
-    setOpenCategories(prev => ({
+    setOpenCategories((prev) => ({
       ...prev,
-      [categoryName]: !prev[categoryName]
+      [categoryName]: !prev[categoryName],
     }));
   };
 
@@ -200,42 +275,42 @@ const GroceryListApp = () => {
 
   const saveEditedCategory = (categoryId) => {
     if (editedCategoryName.trim() !== '') {
-      const oldCategoryName = categories.find(c => c.id === categoryId).name;
+      const oldCategoryName = categories.find((c) => c.id === categoryId).name;
       const newCategoryName = editedCategoryName.trim();
 
-      setCategories(prevCategories =>
-        prevCategories.map(category =>
+      setCategories((prevCategories) =>
+        prevCategories.map((category) =>
           category.id === categoryId ? { ...category, name: newCategoryName } : category
         )
       );
 
-      setItems(prevItems =>
-        prevItems.map(item =>
+      setItems((prevItems) =>
+        prevItems.map((item) =>
           item.category === oldCategoryName
             ? { ...item, category: newCategoryName }
             : item
         )
       );
 
-      setCategoryUsage(prevUsage => {
+      setCategoryUsage((prevUsage) => {
         const { [oldCategoryName]: oldUsage, ...rest } = prevUsage;
         return {
           ...rest,
-          [newCategoryName]: oldUsage || 0
+          [newCategoryName]: oldUsage || 0,
         };
       });
 
-      setUserHistory(prevHistory =>
-        prevHistory.map(entry =>
+      setUserHistory((prevHistory) =>
+        prevHistory.map((entry) =>
           entry.category === oldCategoryName
             ? { ...entry, category: newCategoryName }
             : entry
         )
       );
 
-      setCategoryUpdates(prevUpdates => ({
+      setCategoryUpdates((prevUpdates) => ({
         ...prevUpdates,
-        [oldCategoryName]: newCategoryName
+        [oldCategoryName]: newCategoryName,
       }));
 
       setEditingCategory(null);
@@ -243,42 +318,53 @@ const GroceryListApp = () => {
     }
   };
 
-  const handleUserIdSubmit = (e) => {
-    e.preventDefault();
-    if (newUserId) {
-      setUserId(newUserId);
-      localStorage.setItem('userId', newUserId);
-      setShowUserModal(false);
-      loadUserData(newUserId);
-    }
+  const logout = () => {
+    setAuthToken(null);
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('username');
+    setShowAuthModal(true);
+    setAuthUsername('');
+    setAuthPassword('');
+    setItems([]);
+    setCategories(initialCategories);
+    setUserHistory([]);
+    setCategoryUsage({});
   };
 
-  const createNewUserId = () => {
-    const newId = `user_${Date.now()}`;
-    setUserId(newId);
-    localStorage.setItem('userId', newId);
-    setShowUserModal(false);
-  };
-
-  if (showUserModal) {
+  if (showAuthModal) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
         <div className="bg-gray-800 p-6 rounded-lg">
-          <h2 className="text-xl font-bold mb-4">Enter User ID</h2>
-          <form onSubmit={handleUserIdSubmit} className="flex flex-col gap-4">
+          <h2 className="text-xl font-bold mb-4">
+            {authMode === 'login' ? 'Login' : 'Sign Up'}
+          </h2>
+          <form onSubmit={handleAuthSubmit} className="flex flex-col gap-4">
             <input
               type="text"
-              value={newUserId}
-              onChange={(e) => setNewUserId(e.target.value)}
-              placeholder="Enter your user ID"
+              value={authUsername}
+              onChange={(e) => setAuthUsername(e.target.value)}
+              placeholder="Username"
               className="bg-gray-700 text-white p-2 rounded"
             />
+            <input
+              type="password"
+              value={authPassword}
+              onChange={(e) => setAuthPassword(e.target.value)}
+              placeholder="Password"
+              className="bg-gray-700 text-white p-2 rounded"
+            />
+            {authError && <div className="text-red-500">{authError}</div>}
             <button type="submit" className="bg-red-500 text-white p-2 rounded">
-              Submit
+              {authMode === 'login' ? 'Login' : 'Sign Up'}
             </button>
           </form>
-          <button onClick={createNewUserId} className="mt-4 text-red-500">
-            Create New User ID
+          <button
+            onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
+            className="mt-4 text-red-500"
+          >
+            {authMode === 'login'
+              ? 'Create an account'
+              : 'Already have an account? Log in'}
           </button>
         </div>
       </div>
@@ -287,10 +373,15 @@ const GroceryListApp = () => {
 
   return (
     <div className="bg-black text-white min-h-screen p-4">
-      <h1 className="text-3xl font-bold text-red-500 mb-4">Grocery List</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-3xl font-bold text-red-500">Grocery List</h1>
+        <button onClick={logout} className="bg-gray-700 text-white p-2 rounded">
+          Logout
+        </button>
+      </div>
 
       {categories.map((category) => {
-        const categoryItems = items.filter(item => item.category === category.name);
+        const categoryItems = items.filter((item) => item.category === category.name);
         if (categoryItems.length === 0) return null;
 
         return (
@@ -328,25 +419,25 @@ const GroceryListApp = () => {
             </div>
             {openCategories[category.name] && (
               <ul className="mt-2">
-                {categoryItems.map(item => (
+                {categoryItems.map((item) => (
                   <li key={item.id} className="flex items-center mb-2">
                     {item.checked ? (
-                      <CheckCircle 
-                        className="mr-2 text-green-500" 
-                        onClick={() => toggleChecked(item.id)} 
+                      <CheckCircle
+                        className="mr-2 text-green-500"
+                        onClick={() => toggleChecked(item.id)}
                       />
                     ) : (
-                      <Circle 
-                        className="mr-2 text-gray-500" 
-                        onClick={() => toggleChecked(item.id)} 
+                      <Circle
+                        className="mr-2 text-gray-500"
+                        onClick={() => toggleChecked(item.id)}
                       />
                     )}
                     <span className={`${item.checked ? 'line-through' : ''}`}>
                       {item.name}
                     </span>
-                    <Trash2 
-                      className="ml-auto text-red-500 cursor-pointer" 
-                      onClick={() => removeItem(item.id)} 
+                    <Trash2
+                      className="ml-auto text-red-500 cursor-pointer"
+                      onClick={() => removeItem(item.id)}
                     />
                   </li>
                 ))}
@@ -369,7 +460,7 @@ const GroceryListApp = () => {
           <select
             value={selectedCategory === 'Automatic' ? 'Automatic' : selectedCategory}
             onChange={(e) => {
-              if (e.target.value === "addCustom") {
+              if (e.target.value === 'addCustom') {
                 setIsAddingCategory(true);
               } else {
                 setSelectedCategory(e.target.value);
@@ -378,8 +469,10 @@ const GroceryListApp = () => {
             className="bg-gray-800 text-white p-2 rounded mb-2 w-full"
           >
             <option value="Automatic">Automatic (AI)</option>
-            {categories.map(category => (
-              <option key={category.id} value={category.name}>{category.name}</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.name}>
+                {category.name}
+              </option>
             ))}
             <option value="addCustom">Add custom category</option>
           </select>
@@ -400,18 +493,26 @@ const GroceryListApp = () => {
           )}
 
           {selectedCategory === 'Automatic' && predictedCategory && (
-            <div className="text-white mt-2">Predicted Category: {predictedCategory}</div>
+            <div className="text-white mt-2">
+              Predicted Category: {predictedCategory}
+            </div>
           )}
 
           <div className="flex justify-between">
-            <button 
-              onClick={addItem} 
+            <button
+              onClick={addItem}
               className="bg-red-500 text-white p-2 rounded"
-              disabled={!newItemName || (selectedCategory === 'Automatic' && !predictedCategory)}
+              disabled={
+                !newItemName ||
+                (selectedCategory === 'Automatic' && !predictedCategory)
+              }
             >
               Add Item
             </button>
-            <button onClick={() => setIsAddingItem(false)} className="bg-gray-500 text-white p-2 rounded">
+            <button
+              onClick={() => setIsAddingItem(false)}
+              className="bg-gray-500 text-white p-2 rounded"
+            >
               <X />
             </button>
           </div>
