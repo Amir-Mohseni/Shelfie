@@ -29,6 +29,97 @@ const initialCategories = [
   { id: 15, name: 'Pasta & Grains' },
 ];
 
+const AuthModal = ({ onLogin, onSignup }) => {
+  const [authMode, setAuthMode] = useState('login');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (!username || !password) {
+      setError('Username and password are required.');
+      return;
+    }
+
+    try {
+      if (authMode === 'login') {
+        await onLogin(username, password);
+      } else {
+        await onSignup(username, password);
+      }
+    } catch (err) {
+      setError(err.message || 'An error occurred. Please try again.');
+    }
+  };
+
+  const toggleAuthMode = () => {
+    setAuthMode(authMode === 'login' ? 'signup' : 'login');
+    setError('');
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div className="bg-gray-800 p-8 rounded-lg max-w-md w-full">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-red-500">
+            {authMode === 'login' ? 'Welcome Back!' : 'Create Account'}
+          </h2>
+          <button onClick={() => onLogin(null)} className="text-gray-400 hover:text-white">
+            <X size={24} />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-1">
+              Username
+            </label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full bg-gray-700 text-white p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              placeholder="Enter your username"
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-gray-700 text-white p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              placeholder="Enter your password"
+            />
+          </div>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <button
+            type="submit"
+            className="w-full bg-red-500 text-white p-3 rounded-md hover:bg-red-600 transition-colors"
+          >
+            {authMode === 'login' ? 'Log In' : 'Sign Up'}
+          </button>
+        </form>
+        <p className="mt-4 text-center text-sm text-gray-400">
+          {authMode === 'login' ? "Don't have an account?" : 'Already have an account?'}
+          <button
+            onClick={toggleAuthMode}
+            className="ml-1 text-red-500 hover:text-red-400 focus:outline-none"
+          >
+            {authMode === 'login' ? 'Sign up' : 'Log in'}
+          </button>
+        </p>
+      </div>
+    </div>
+  );
+};
+
 const GroceryListApp = () => {
   // State variables for the main app functionality
   const [categories, setCategories] = useState(initialCategories);
@@ -52,10 +143,7 @@ const GroceryListApp = () => {
   // State variables for authentication
   const [authToken, setAuthToken] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(true);
-  const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
   const [authUsername, setAuthUsername] = useState('');
-  const [authPassword, setAuthPassword] = useState('');
-  const [authError, setAuthError] = useState('');
 
   useEffect(() => {
     const savedToken = localStorage.getItem('authToken');
@@ -90,45 +178,39 @@ const GroceryListApp = () => {
     }
   }, [newItemName]);
 
-  const handleAuthSubmit = async (e) => {
-    e.preventDefault();
-    if (!authUsername || !authPassword) {
-      setAuthError('Username and password are required.');
-      return;
-    }
-
+  const handleAuth = async (username, password, isLogin) => {
     try {
-      const url =
-        authMode === 'login'
-          ? 'http://127.0.0.1:5000/login'
-          : 'http://127.0.0.1:5000/signup';
-      const response = await fetch(url, {
+      const endpoint = isLogin ? 'login' : 'signup';
+      const response = await fetch(`http://127.0.0.1:5000/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: authUsername, password: authPassword }),
+        body: JSON.stringify({ username, password }),
       });
       const data = await response.json();
 
       if (response.ok) {
-        if (authMode === 'signup') {
-          setAuthMode('login');
-          setAuthError('Signup successful! Please log in.');
-        } else {
-          const { access_token } = data;
-          setAuthToken(access_token);
-          localStorage.setItem('authToken', access_token);
-          localStorage.setItem('username', authUsername);
-          setShowAuthModal(false);
-          loadUserData(authUsername);
-        }
+        const { access_token } = data;
+        setAuthToken(access_token);
+        localStorage.setItem('authToken', access_token);
+        localStorage.setItem('username', username);
+        setShowAuthModal(false);
+        loadUserData(username);
       } else {
-        setAuthError(data.error || 'Authentication failed.');
+        throw new Error(data.error || `${isLogin ? 'Login' : 'Signup'} failed`);
       }
     } catch (error) {
-      console.error('Error during authentication:', error);
-      setAuthError('An error occurred during authentication.');
+      throw new Error(error.message || `An error occurred during ${isLogin ? 'login' : 'signup'}`);
     }
   };
+
+  if (showAuthModal) {
+    return (
+      <AuthModal
+        onLogin={(username, password) => handleAuth(username, password, true)}
+        onSignup={(username, password) => handleAuth(username, password, false)}
+      />
+    );
+  }
 
   const fetchPredictedCategory = async (itemName) => {
     if (!itemName) return;
@@ -324,7 +406,6 @@ const GroceryListApp = () => {
     localStorage.removeItem('username');
     setShowAuthModal(true);
     setAuthUsername('');
-    setAuthPassword('');
     setItems([]);
     setCategories(initialCategories);
     setUserHistory([]);
@@ -333,41 +414,49 @@ const GroceryListApp = () => {
 
   if (showAuthModal) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div className="bg-gray-800 p-6 rounded-lg">
-          <h2 className="text-xl font-bold mb-4">
-            {authMode === 'login' ? 'Login' : 'Sign Up'}
-          </h2>
-          <form onSubmit={handleAuthSubmit} className="flex flex-col gap-4">
-            <input
-              type="text"
-              value={authUsername}
-              onChange={(e) => setAuthUsername(e.target.value)}
-              placeholder="Username"
-              className="bg-gray-700 text-white p-2 rounded"
-            />
-            <input
-              type="password"
-              value={authPassword}
-              onChange={(e) => setAuthPassword(e.target.value)}
-              placeholder="Password"
-              className="bg-gray-700 text-white p-2 rounded"
-            />
-            {authError && <div className="text-red-500">{authError}</div>}
-            <button type="submit" className="bg-red-500 text-white p-2 rounded">
-              {authMode === 'login' ? 'Login' : 'Sign Up'}
-            </button>
-          </form>
-          <button
-            onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
-            className="mt-4 text-red-500"
-          >
-            {authMode === 'login'
-              ? 'Create an account'
-              : 'Already have an account? Log in'}
-          </button>
-        </div>
-      </div>
+      <AuthModal
+        onLogin={async (username, password) => {
+          try {
+            const response = await fetch('http://127.0.0.1:5000/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username, password }),
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+              const { access_token } = data;
+              setAuthToken(access_token);
+              localStorage.setItem('authToken', access_token);
+              localStorage.setItem('username', username);
+              setShowAuthModal(false);
+              loadUserData(username);
+            } else {
+              throw new Error(data.error || 'Login failed');
+            }
+          } catch (error) {
+            throw new Error(error.message || 'An error occurred during login');
+          }
+        }}
+        onSignup={async (username, password) => {
+          try {
+            const response = await fetch('http://127.0.0.1:5000/signup', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username, password }),
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+              throw new Error('Signup successful! Please log in.');
+            } else {
+              throw new Error(data.error || 'Signup failed');
+            }
+          } catch (error) {
+            throw new Error(error.message || 'An error occurred during signup');
+          }
+        }}
+      />
     );
   }
 
