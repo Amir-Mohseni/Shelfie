@@ -1,3 +1,4 @@
+
 .analyzer-container {
     display: flex;
     max-width: 1200px;
@@ -107,3 +108,91 @@
     background-color: #45a049;
   }
   
+
+.menu-panel {
+  width: 200px; /* Adjust width as needed */
+  padding: 10px;
+  background-color: #f9f9f9; /* Background color for the menu */
+  border: 1px solid #ddd; /* Border for the menu */
+}
+
+.filter-options {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+}
+
+.filter-options label {
+  margin-bottom: 10px; /* Space between items */
+}
+.analyzer-container {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Arial', sans-serif;
+}
+
+.menu-panel {
+  width: 20%;
+  padding: 20px;
+  border-right: 1px solid #ccc;
+  background-color: #f7f7f7;
+}
+
+.menu-panel h2 {
+  font-size: 24px;
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 20px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background-color: #ecf0f1;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filter-options label {
+  font-size: 16px;
+  color: #34495e;
+}
+
+.left-panel {
+  width: 40%;
+  padding: 20px;
+}
+
+.right-panel {
+  width: 15%;
+  padding: 20px;
+  border-left: 1px solid #ccc;
+}
+
+#results .food-item {
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#results .food-item:hover {
+  background-color: #f0f0f0;
+}
+
+#detailedView h2 {
+  margin-bottom: 10px;
+}
+
+#detailedView ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+#detailedView ul li {
+  margin-bottom: 5px;
+}

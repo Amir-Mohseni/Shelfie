@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './MacronutrientAnalyzer.css'; // We'll create this CSS file next
+import './MacronutrientAnalyzer.css'; // Ensure you style the menu as needed
 
 const MacronutrientAnalyzer = () => {
   const [foodData, setFoodData] = useState([]);
@@ -7,36 +7,62 @@ const MacronutrientAnalyzer = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [displayedResults, setDisplayedResults] = useState(10);
   const [selectedFood, setSelectedFood] = useState(null);
+  const [categoryFilters, setCategoryFilters] = useState({
+    'Baked Foods': false,
+    Snacks: false,
+    Sweets: false,
+    Vegetables: false,
+    'American Indian': false,
+    'Restaurant Foods': false,
+    Beverages: false,
+    'Fats and Oils': false,
+    Meats: false,
+    'Dairy and Egg Products': false,
+    'Baby Foods': false,
+    'Breakfast Cereals': false,
+    'Soups and Sauces': false,
+    'Beans and Lentils': false,
+    Fish: false,
+    Fruits: false,
+    'Grains and Pasta': false,
+    'Nuts and Seeds': false,
+    'Prepared Meals': false,
+    'Fast Foods': false,
+    'Spices and Herbs': false,
+  });
 
   useEffect(() => {
-    // Load CSV data
     async function loadCSV() {
       const response = await fetch(process.env.PUBLIC_URL + '/food_data.csv');
       const data = await response.text();
-      const rows = data.split('\n').slice(1); // Skip header row
+      const rows = data.split('\n').slice(1);
+
       const parsedData = rows.map(row => {
         const columns = row.split(',');
+
         return {
-          name: columns[1],
-          calories: parseFloat(columns[3]),
-          fat: parseFloat(columns[4]),
-          protein: parseFloat(columns[5]),
-          carbs: parseFloat(columns[6]),
-          fiber: parseFloat(columns[8]),
-          sugars: parseFloat(columns[7]),
-          cholesterol: parseFloat(columns[9]),
-          saturatedFats: parseFloat(columns[10]),
-          calcium: parseFloat(columns[11]),
-          iron: parseFloat(columns[12]),
-          potassium: parseFloat(columns[13]),
-          magnesium: parseFloat(columns[14]),
-          vitaminA: parseFloat(columns[15]),
-          vitaminC: parseFloat(columns[17]),
-          vitaminB12: parseFloat(columns[18]),
-          vitaminD: parseFloat(columns[19]),
-          vitaminE: parseFloat(columns[20]),
+          name: columns[1], // Food name
+          category: columns[2], // Food group
+          calories: parseFloat(columns[3]) || 0, // Calories (kcal)
+          fat: parseFloat(columns[4]) || 0, // Fat (g)
+          protein: parseFloat(columns[5]) || 0, // Protein (g)
+          carbs: parseFloat(columns[6]) || 0, // Carbohydrates (g)
+          sugars: parseFloat(columns[7]) || 0, // Sugars (g)
+          fiber: parseFloat(columns[8]) || 0, // Fiber (g)
+          cholesterol: parseFloat(columns[9]) || 0, // Cholesterol (mg)
+          saturatedFats: parseFloat(columns[10]) || 0, // Saturated Fats (g)
+          calcium: parseFloat(columns[11]) || 0, // Calcium (mg)
+          iron: parseFloat(columns[12]) || 0, // Iron (mg)
+          potassium: parseFloat(columns[13]) || 0, // Potassium (mg)
+          magnesium: parseFloat(columns[14]) || 0, // Magnesium (mg)
+          vitaminA: parseFloat(columns[15]) || 0, // Vitamin A (IU)
+          vitaminC: parseFloat(columns[17]) || 0, // Vitamin C (mg)
+          vitaminD: parseFloat(columns[19]) || 0, // Vitamin D (mcg)
+          omega3: parseFloat(columns[24]) || 0, // Omega-3 (mg)
+          omega6: parseFloat(columns[25]) || 0 // Omega-6 (mg)
         };
       });
+
       setFoodData(parsedData);
     }
 
@@ -44,9 +70,17 @@ const MacronutrientAnalyzer = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = foodData.filter(food =>
-      food.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filtered = foodData.filter(food => {
+      const isFilteredOut = Object.entries(categoryFilters).some(([key, value]) => {
+        if (value && key !== 'none') {
+          return food.category === key; // Exclude food if it matches a checked filter
+        }
+        return false; // Don't exclude if the filter is not checked
+      });
+
+      // If "none" is checked, it should show all foods
+      return !isFilteredOut && (categoryFilters.none || food.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    });
 
     filtered.sort((a, b) => {
       if (a.name.length === b.name.length) {
@@ -58,51 +92,13 @@ const MacronutrientAnalyzer = () => {
     setFilteredFoods(filtered);
     setDisplayedResults(10);
     setSelectedFood(null);
-  }, [searchTerm, foodData]);
+  }, [searchTerm, foodData, categoryFilters]);
 
-  const calculateScore = (food) => {
-    // (Same scoring logic as in your original code)
-    let score = 0;
-
-    // Positive scoring: protein
-    if (food.protein > 25) score += 4;
-    else if (food.protein > 15) score += 3;
-    else if (food.protein > 10) score += 2;
-    else if (food.protein > 5) score += 1;
-
-    // Positive scoring: fiber
-    if (food.fiber > 10) score += 3;
-    else if (food.fiber > 5) score += 2;
-    else if (food.fiber > 2) score += 1;
-
-    // Positive scoring: vitamins and minerals
-    if (food.vitaminC > 30) score += 1;
-    if (food.calcium > 100) score += 1;
-    if (food.iron > 5) score += 1;
-    if (food.potassium > 300) score += 1;
-
-    // Positive scoring: low fat and carbs
-    if (food.fat < 10) score += 1;
-    if (food.carbs < 20) score += 1;
-
-    // Negative scoring: sugars
-    if (food.sugars > 20) score -= 2;
-    else if (food.sugars > 10) score -= 1;
-    else if (food.sugars < 3) score += 2;
-
-    // Negative scoring: saturated fats
-    if (food.saturatedFats > 10) score -= 2;
-    else if (food.saturatedFats > 5) score -= 1;
-
-    // Calories score modifier (rewards low-calorie foods)
-    if (food.calories < 100) score += 2; // Excellent calorie range
-    else if (food.calories < 200) score += 1; // Good calorie range
-    else if (food.calories > 350) score -= 2; // Penalize high-calorie foods
-
-    // Normalize the score to be within 0 to 10
-    score = Math.max(0, Math.min(score, 10));
-
-    return score;
+  const handleFilterChange = (category) => {
+    setCategoryFilters(prevFilters => ({
+      ...prevFilters,
+      [category]: !prevFilters[category],
+    }));
   };
 
   const showDetailedView = (food) => {
@@ -113,8 +109,52 @@ const MacronutrientAnalyzer = () => {
     setDisplayedResults(prev => prev + 10);
   };
 
+  const resetFilters = () => {
+    setCategoryFilters({
+      'Baked Foods': false,
+      Snacks: false,
+      Sweets: false,
+      Vegetables: false,
+      'American Indian': false,
+      'Restaurant Foods': false,
+      Beverages: false,
+      'Fats and Oils': false,
+      Meats: false,
+      'Dairy and Egg Products': false,
+      'Baby Foods': false,
+      'Breakfast Cereals': false,
+      'Soups and Sauces': false,
+      'Beans and Lentils': false,
+      Fish: false,
+      Fruits: false,
+      'Grains and Pasta': false,
+      'Nuts and Seeds': false,
+      'Prepared Meals': false,
+      'Fast Foods': false,
+      'Spices and Herbs': false,
+    });
+  };
+
   return (
     <div className="analyzer-container">
+      <div className="menu-panel">
+        <h2>Filters</h2>
+        <div className="filter-options">
+          {/* Individual food category checkboxes */}
+          {Object.keys(categoryFilters).filter(key => key !== 'none' && key !== 'vegan' && key !== 'keto').map(category => (
+            <label key={category}>
+              <input
+                type="checkbox"
+                checked={categoryFilters[category]}
+                onChange={() => handleFilterChange(category)}
+              />
+              {category}
+            </label>
+          ))}
+        </div>
+        <button onClick={resetFilters}>Reset Filters</button> {/* Reset button */}
+      </div>
+
       <div className="left-panel">
         <h1>Macronutrient Profile Scorer</h1>
         <input
@@ -132,6 +172,8 @@ const MacronutrientAnalyzer = () => {
               onClick={() => showDetailedView(food)}
             >
               <h3>{food.name}</h3>
+              <p>Calories: {food.calories} kcal</p>
+              <p>Fat: {food.fat} g | Protein: {food.protein} g | Carbs: {food.carbs} g</p>
             </div>
           ))}
         </div>
@@ -141,40 +183,29 @@ const MacronutrientAnalyzer = () => {
           </button>
         )}
       </div>
+
       {selectedFood && (
         <div className="right-panel" id="detailedView">
           <h2>{selectedFood.name}</h2>
-          <p className="macro">Calories: {selectedFood.calories}</p>
-          <p className="macro">Fat: {selectedFood.fat}g</p>
-          <p className="macro">Protein: {selectedFood.protein}g</p>
-          <p className="macro">Carbs: {selectedFood.carbs}g</p>
-          <p className="macro">Fiber: {selectedFood.fiber}g</p>
-          <p className="macro">Sugars: {selectedFood.sugars}g</p>
-          <p className="macro">Cholesterol: {selectedFood.cholesterol}mg</p>
-          <p className="macro">Saturated Fats: {selectedFood.saturatedFats}g</p>
-          <p className="macro">Calcium: {selectedFood.calcium}mg</p>
-          <p className="macro">Iron: {selectedFood.iron}mg</p>
-          <p className="macro">Potassium: {selectedFood.potassium}mg</p>
-          <p className="macro">Magnesium: {selectedFood.magnesium}mg</p>
-          <p className="macro">Vitamin A: {selectedFood.vitaminA}IU</p>
-          <p className="macro">Vitamin C: {selectedFood.vitaminC}mg</p>
-          <p className="macro">Vitamin B12: {selectedFood.vitaminB12}mcg</p>
-          <p className="macro">Vitamin D: {selectedFood.vitaminD}mcg</p>
-          <p className="macro">Vitamin E: {selectedFood.vitaminE}mg</p>
-          <p>
-            Score:{' '}
-            <span
-              className={`score ${
-                calculateScore(selectedFood) >= 7
-                  ? 'score-good'
-                  : calculateScore(selectedFood) >= 4
-                  ? 'score-medium'
-                  : 'score-bad'
-              }`}
-            >
-              {calculateScore(selectedFood)}
-            </span>
-          </p>
+          <ul>
+            <li><strong>Calories:</strong> {selectedFood.calories} kcal</li>
+            <li><strong>Fat:</strong> {selectedFood.fat} g</li>
+            <li><strong>Protein:</strong> {selectedFood.protein} g</li>
+            <li><strong>Carbohydrates:</strong> {selectedFood.carbs} g</li>
+            <li><strong>Sugars:</strong> {selectedFood.sugars} g</li>
+            <li><strong>Fiber:</strong> {selectedFood.fiber} g</li>
+            <li><strong>Cholesterol:</strong> {selectedFood.cholesterol} mg</li>
+            <li><strong>Saturated Fats:</strong> {selectedFood.saturatedFats} g</li>
+            <li><strong>Vitamin A:</strong> {selectedFood.vitaminA} IU</li>
+            <li><strong>Vitamin C:</strong> {selectedFood.vitaminC} mg</li>
+            <li><strong>Calcium:</strong> {selectedFood.calcium} mg</li>
+            <li><strong>Iron:</strong> {selectedFood.iron} mg</li>
+            <li><strong>Potassium:</strong> {selectedFood.potassium} mg</li>
+            <li><strong>Magnesium:</strong> {selectedFood.magnesium} mg</li>
+            <li><strong>Vitamin D:</strong> {selectedFood.vitaminD} mcg</li>
+            <li><strong>Omega-3:</strong> {selectedFood.omega3} mg</li>
+            <li><strong>Omega-6:</strong> {selectedFood.omega6} mg</li>
+          </ul>
         </div>
       )}
     </div>
