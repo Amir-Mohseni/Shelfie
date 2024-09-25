@@ -1,4 +1,3 @@
-
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
@@ -7,6 +6,7 @@ from sklearn.metrics import classification_report
 import numpy as np
 import joblib
 import os
+import sys
 
 label_mapping = {
     'Baked Foods': 0,
@@ -71,7 +71,7 @@ def train_and_save_model(file_path):
     y_pred = model.predict(X_test)
     print("Classification Report:\n", classification_report(y_test, y_pred))
 
-# Step 5: Predict food groups for new items
+# Step 5: Predict food groups for new items and check filters
 def predict_food_groups(food_names):
     # Load the model and vectorizer
     model = joblib.load('food_model.pkl')
@@ -84,6 +84,12 @@ def predict_food_groups(food_names):
     predictions = model.predict(X_new)
     return predictions
 
+# Check if the food item is within the category filters
+def is_item_visible(food_name, category_filters):
+    predictions = predict_food_groups([food_name])
+    category = list(label_mapping.keys())[list(label_mapping.values()).index(predictions[0])]
+    return category_filters.get(category, False)
+
 if __name__ == "__main__":
     # Check if the model exists
     if not os.path.exists('food_model.pkl'):
@@ -92,10 +98,22 @@ if __name__ == "__main__":
     else:
         print("Model already exists. Skipping training.")
 
-    # Example: Predict the food group for new items
-    new_items = ["Apple", "Chicken Salad", "Pork Chips", "Milk Cake", "Chocolate Milk"]
-    predictions = predict_food_groups(new_items)
-    
-    for item, pred in zip(new_items, predictions):
-        category = list(label_mapping.keys())[list(label_mapping.values()).index(pred)]
-        print(f"'{item}' belongs to category: {category}")
+    # Get the food item from command line arguments
+    if len(sys.argv) > 1:
+        food_item = sys.argv[1].lower()  # Get the food item name from the command line
+        # Define the category filters (This could be dynamic based on your needs)
+        category_filters = {
+            'Baked Foods': True,
+            'Snacks': True,
+            'Sweets': False,
+            'Vegetables': True,
+            # Add other categories and their filter status
+        }
+        # Check if the food item should be visible
+        visible = is_item_visible(food_item, category_filters)
+        if visible:
+            print(f"'{food_item}' is visible.")
+        else:
+            print(f"'{food_item}' is not visible.")
+    else:
+        print("Please provide a food item as an argument.")

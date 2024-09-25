@@ -8,29 +8,30 @@ const MacronutrientAnalyzer = () => {
   const [displayedResults, setDisplayedResults] = useState(10);
   const [selectedFood, setSelectedFood] = useState(null);
   const [categoryFilters, setCategoryFilters] = useState({
-    'Baked Foods': false,
-    Snacks: false,
-    Sweets: false,
-    Vegetables: false,
     'American Indian': false,
-    'Restaurant Foods': false,
-    Beverages: false,
-    'Fats and Oils': false,
-    Meats: false,
-    'Dairy and Egg Products': false,
     'Baby Foods': false,
-    'Breakfast Cereals': false,
-    'Soups and Sauces': false,
+    'Baked Foods': false,
+    Beverages: false,
     'Beans and Lentils': false,
+    'Breakfast Cereals': false,
+    'Dairy and Egg Products': false,
+    'Fast Foods': false,
     Fish: false,
     Fruits: false,
+    'Fats and Oils': false,
     'Grains and Pasta': false,
+    Meats: false,
     'Nuts and Seeds': false,
     'Prepared Meals': false,
-    'Fast Foods': false,
+    'Restaurant Foods': false,
+    Snacks: false,
+    'Soups and Sauces': false,
+    Sweets: false,
     'Spices and Herbs': false,
+    Vegetables: false
   });
 
+  // Load CSV data and parse it into an array
   useEffect(() => {
     async function loadCSV() {
       const response = await fetch(process.env.PUBLIC_URL + '/food_data.csv');
@@ -40,7 +41,7 @@ const MacronutrientAnalyzer = () => {
       const parsedData = rows.map(row => {
         const columns = row.split(',');
 
-        return {
+        const foodItem = {
           name: columns[1], // Food name
           category: columns[2], // Food group
           calories: parseFloat(columns[3]) || 0, // Calories (kcal)
@@ -59,8 +60,14 @@ const MacronutrientAnalyzer = () => {
           vitaminC: parseFloat(columns[17]) || 0, // Vitamin C (mg)
           vitaminD: parseFloat(columns[19]) || 0, // Vitamin D (mcg)
           omega3: parseFloat(columns[24]) || 0, // Omega-3 (mg)
-          omega6: parseFloat(columns[25]) || 0 // Omega-6 (mg)
+          omega6: parseFloat(columns[25]) || 0, // Omega-6 (mg)
+          predictedGroup1: columns[118], // DN (Predicted Food Group 1)
+          predictedGroup2: columns[119], // DO (Predicted Food Group 2)
+          predictedGroup3: columns[120], // DP (Predicted Food Group 3)
         };
+
+        console.log(foodItem); // Log each food item for debugging
+        return foodItem;
       });
 
       setFoodData(parsedData);
@@ -69,19 +76,25 @@ const MacronutrientAnalyzer = () => {
     loadCSV();
   }, []);
 
+  // Filter food data based on search term and selected filters
   useEffect(() => {
+
     const filtered = foodData.filter(food => {
-      const isFilteredOut = Object.entries(categoryFilters).some(([key, value]) => {
-        if (value && key !== 'none') {
-          return food.category === key; // Exclude food if it matches a checked filter
-        }
-        return false; // Don't exclude if the filter is not checked
-      });
+        if (!food || !food.name) return false; // Skip undefined or invalid food items
 
-      // If "none" is checked, it should show all foods
-      return !isFilteredOut && (categoryFilters.none || food.name.toLowerCase().includes(searchTerm.toLowerCase()));
+        const matchesSearchTerm = food.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+        // Exclude items based on category filters
+        const isFilteredOut = Object.entries(categoryFilters).some(([category, isChecked]) => {
+            return isChecked && (food.category === category ||
+                food.predictedGroup1 === category ||
+                food.predictedGroup2 === category ||
+                food.predictedGroup3 === category);
+        });
+
+        return matchesSearchTerm && !isFilteredOut;
     });
-
+    // Sort the filtered foods alphabetically by name length
     filtered.sort((a, b) => {
       if (a.name.length === b.name.length) {
         return a.name.localeCompare(b.name);
@@ -90,49 +103,53 @@ const MacronutrientAnalyzer = () => {
     });
 
     setFilteredFoods(filtered);
-    setDisplayedResults(10);
-    setSelectedFood(null);
+    setDisplayedResults(10); // Reset to showing 10 results
+    setSelectedFood(null); // Reset the selected food when filters/search change
   }, [searchTerm, foodData, categoryFilters]);
 
+  // Handle checkbox toggle for each category filter
   const handleFilterChange = (category) => {
     setCategoryFilters(prevFilters => ({
       ...prevFilters,
-      [category]: !prevFilters[category],
+      [category]: !prevFilters[category], // Toggle the current filter
     }));
   };
 
-  const showDetailedView = (food) => {
-    setSelectedFood(food);
-  };
-
+  // Display more results (increment by 10)
   const loadMoreResults = () => {
     setDisplayedResults(prev => prev + 10);
   };
 
+  // Reset all filters
   const resetFilters = () => {
     setCategoryFilters({
-      'Baked Foods': false,
-      Snacks: false,
-      Sweets: false,
-      Vegetables: false,
       'American Indian': false,
-      'Restaurant Foods': false,
-      Beverages: false,
-      'Fats and Oils': false,
-      Meats: false,
-      'Dairy and Egg Products': false,
       'Baby Foods': false,
-      'Breakfast Cereals': false,
-      'Soups and Sauces': false,
+      'Baked Foods': false,
+      Beverages: false,
       'Beans and Lentils': false,
+      'Breakfast Cereals': false,
+      'Dairy and Egg Products': false,
+      'Fast Foods': false,
       Fish: false,
       Fruits: false,
+      'Fats and Oils': false,
       'Grains and Pasta': false,
+      Meats: false,
       'Nuts and Seeds': false,
       'Prepared Meals': false,
-      'Fast Foods': false,
+      'Restaurant Foods': false,
+      Snacks: false,
+      'Soups and Sauces': false,
+      Sweets: false,
       'Spices and Herbs': false,
+      Vegetables: false
     });
+  };
+
+  // Show detailed view of a selected food item
+  const showDetailedView = (food) => {
+    setSelectedFood(food);
   };
 
   return (
@@ -141,7 +158,7 @@ const MacronutrientAnalyzer = () => {
         <h2>Filters</h2>
         <div className="filter-options">
           {/* Individual food category checkboxes */}
-          {Object.keys(categoryFilters).filter(key => key !== 'none' && key !== 'vegan' && key !== 'keto').map(category => (
+          {Object.keys(categoryFilters).map(category => (
             <label key={category}>
               <input
                 type="checkbox"
@@ -166,15 +183,17 @@ const MacronutrientAnalyzer = () => {
         />
         <div id="results">
           {filteredFoods.slice(0, displayedResults).map(food => (
-            <div
-              key={food.name}
-              className="food-item"
-              onClick={() => showDetailedView(food)}
-            >
-              <h3>{food.name}</h3>
-              <p>Calories: {food.calories} kcal</p>
-              <p>Fat: {food.fat} g | Protein: {food.protein} g | Carbs: {food.carbs} g</p>
-            </div>
+            food ? (
+              <div
+                key={food.name}
+                className="food-item"
+                onClick={() => showDetailedView(food)}
+              >
+                <h3>{food.name}</h3>
+                <p>Calories: {food.calories} kcal</p>
+                <p>Fat: {food.fat} g | Protein: {food.protein} g | Carbs: {food.carbs} g</p>
+              </div>
+            ) : null // Render nothing if food is undefined
           ))}
         </div>
         {filteredFoods.length > displayedResults && (
@@ -184,29 +203,32 @@ const MacronutrientAnalyzer = () => {
         )}
       </div>
 
+
       {selectedFood && (
-        <div className="right-panel" id="detailedView">
-          <h2>{selectedFood.name}</h2>
-          <ul>
-            <li><strong>Calories:</strong> {selectedFood.calories} kcal</li>
-            <li><strong>Fat:</strong> {selectedFood.fat} g</li>
-            <li><strong>Protein:</strong> {selectedFood.protein} g</li>
-            <li><strong>Carbohydrates:</strong> {selectedFood.carbs} g</li>
-            <li><strong>Sugars:</strong> {selectedFood.sugars} g</li>
-            <li><strong>Fiber:</strong> {selectedFood.fiber} g</li>
-            <li><strong>Cholesterol:</strong> {selectedFood.cholesterol} mg</li>
-            <li><strong>Saturated Fats:</strong> {selectedFood.saturatedFats} g</li>
-            <li><strong>Vitamin A:</strong> {selectedFood.vitaminA} IU</li>
-            <li><strong>Vitamin C:</strong> {selectedFood.vitaminC} mg</li>
-            <li><strong>Calcium:</strong> {selectedFood.calcium} mg</li>
-            <li><strong>Iron:</strong> {selectedFood.iron} mg</li>
-            <li><strong>Potassium:</strong> {selectedFood.potassium} mg</li>
-            <li><strong>Magnesium:</strong> {selectedFood.magnesium} mg</li>
-            <li><strong>Vitamin D:</strong> {selectedFood.vitaminD} mcg</li>
-            <li><strong>Omega-3:</strong> {selectedFood.omega3} mg</li>
-            <li><strong>Omega-6:</strong> {selectedFood.omega6} mg</li>
-          </ul>
-        </div>
+          <div className="right-panel" id="detailedView">
+              <h2>{selectedFood.name}</h2>
+              <ul>
+                  <li><strong>Categories:</strong></li>
+                  <li>{selectedFood.category}</li> {/* Main category */}
+                  <li>{selectedFood.predictedGroup1}</li> {/* Predicted Food Group 1 */}
+                  <li>{selectedFood.predictedGroup2}</li> {/* Predicted Food Group 2 */}
+                  <li>{selectedFood.predictedGroup3}</li> {/* Predicted Food Group 3 */}
+                  <li><strong>Calories:</strong> {selectedFood.calories} kcal</li>
+                  <li><strong>Fat:</strong> {selectedFood.fat} g</li>
+                  <li><strong>Protein:</strong> {selectedFood.protein} g</li>
+                  <li><strong>Carbohydrates:</strong> {selectedFood.carbs} g</li>
+                  <li><strong>Sugars:</strong> {selectedFood.sugars} g</li>
+                  <li><strong>Fiber:</strong> {selectedFood.fiber} g</li>
+                  <li><strong>Cholesterol:</strong> {selectedFood.cholesterol} mg</li>
+                  <li><strong>Saturated Fats:</strong> {selectedFood.saturatedFats} g</li>
+                  <li><strong>Vitamin A:</strong> {selectedFood.vitaminA} IU</li>
+                  <li><strong>Vitamin C:</strong> {selectedFood.vitaminC} mg</li>
+                  <li><strong>Vitamin D:</strong> {selectedFood.vitaminD} mcg</li>
+                  <li><strong>Omega-3:</strong> {selectedFood.omega3} mg</li>
+                  <li><strong>Omega-6:</strong> {selectedFood.omega6} mg</li>
+              </ul>
+              <button onClick={() => setSelectedFood(null)}>Close</button>
+          </div>
       )}
     </div>
   );
