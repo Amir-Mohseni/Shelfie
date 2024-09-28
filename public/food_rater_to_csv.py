@@ -34,17 +34,17 @@ category_ratings = {
     'Sweets': -3,
     'Fast Foods': -3,
     'Fish': 3,
-    'Meats': 3,
+    'Meats': 1.5,
     'Dairy and Egg Products': 3,
     'Baked Foods': 2,
     'Restaurant Foods': 0,
-    'Beverages': 0,
+    'Beverages': -1,
     'Beans and Lentils': 3,
     'Nuts and Seeds': 3,
     'Grains and Pasta': -1,
     'Prepared Meals': -3,
     'Spices and Herbs': 0,
-    'Fats and Oils': -1
+    'Fats and Oils': 0
 }
 
 # Step 7: Create a rating function that considers nutrients and food category
@@ -55,18 +55,20 @@ def rate_food(nutrient_profile, food_name, food_group_1, food_group_2, food_grou
     
     # Base nutrient rating
     rating = (
-        0.15 * protein + 0.1 * fiber - 0.1 * total_fat - 0.2 * sugars + 
-        0.05 * calcium + 0.05 * iron + 0.05 * potassium + 0.05 * magnesium + 
-        0.05 * vitamin_a + 0.05 * vitamin_c + 0.05 * vitamin_d + 0.05 * vitamin_e +
-        0.05 * vitamin_b12 + 0.05 * folate
+        0.15 * protein + 0.1 * fiber - 0.1 * total_fat - 0.35 * sugars + 
+        0.20 * calcium + 0.20 * iron + 0.05 * potassium + 0.05 * magnesium + 
+        0.15 * vitamin_a + 0.15 * vitamin_c + 0.15 * vitamin_d + 0.15 * vitamin_e +
+        0.15 * vitamin_b12 + 0.05 * folate
     )
     
     # Adjust the score based on healthy vs. unhealthy fats
     rating += 0.1 * (monounsaturated_fat + polyunsaturated_fat)  # Reward healthy fats
-    rating -= 0.2 * (saturated_fat + trans_fat)  # Penalize unhealthy fats
+    rating -= 0.4 * (saturated_fat + trans_fat)  # Penalize unhealthy fats
 
     # Add calorie control: slightly penalize extremely high-calorie foods
-    if calories > 500:
+    if calories < 60:
+        rating += 1
+    if calories > 250:
         rating -= 0.1 * (calories - 500) / 100
     
     # Adjust score based on food groups (categories)
