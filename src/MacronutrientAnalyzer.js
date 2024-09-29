@@ -7,6 +7,7 @@ const MacronutrientAnalyzer = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [displayedResults, setDisplayedResults] = useState(10);
   const [selectedFood, setSelectedFood] = useState(null);
+  const [foodScore, setFoodScore] = useState(null);
   const [categoryFilters, setCategoryFilters] = useState({
     'American Indian': false,
     'Baby Foods': false,
@@ -42,6 +43,7 @@ const MacronutrientAnalyzer = () => {
         const columns = row.split(',');
 
         const foodItem = {
+          id: columns[0],
           name: columns[1], // Food name
           category: columns[2], // Food group
           calories: parseFloat(columns[3]) || 0, // Calories (kcal)
@@ -147,9 +149,51 @@ const MacronutrientAnalyzer = () => {
     });
   };
 
+
+  useEffect(() => {
+    if (selectedFood) {
+      fetch(`http://localhost:5000/get_food_rating?food_id=${selectedFood.id}`)
+        .then(response => response.json())
+        .then(data => {
+          console.log(data); // Log the entire response
+          if (data && data.scaled_rating !== undefined) {
+            setFoodScore(data.scaled_rating); // Update to use scaled_rating
+          } else {
+            console.error('Score not found in response:', data);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching food score:', error);
+        });
+    }
+  }, [selectedFood]);
+
   // Show detailed view of a selected food item
   const showDetailedView = (food) => {
     setSelectedFood(food);
+  };
+
+  const getLetterGrade = (score) => {
+    if (score >= 7.5) return 'A';
+    if (score >= 5) return 'B';
+    if (score >= 2.5) return 'C';
+    return 'D';
+  };
+
+  // Get color based on letter grade
+  const getScoreColor = (grade) => {
+    switch (grade) {
+      case 'A':
+        return 'green';
+      case 'B':
+        return 'lightgreen';
+      case 'C':
+        return 'orange';
+      case 'D':
+        return 'red';
+      default:
+        return 'gray';
+    }
   };
 
   return (
@@ -226,7 +270,14 @@ const MacronutrientAnalyzer = () => {
                   <li><strong>Vitamin D:</strong> {selectedFood.vitaminD} mcg</li>
                   <li><strong>Omega-3:</strong> {selectedFood.omega3} mg</li>
                   <li><strong>Omega-6:</strong> {selectedFood.omega6} mg</li>
+                  {foodScore !== null && (
+                    <div style={{ backgroundColor: getScoreColor(getLetterGrade(foodScore)), padding: '10px', borderRadius: '5px', color: 'white' }}>
+                      <h4>Food Score: ({getLetterGrade(foodScore)})</h4>
+                    </div>
+                  )}
               </ul>
+
+
               <button onClick={() => setSelectedFood(null)}>Close</button>
           </div>
       )}
