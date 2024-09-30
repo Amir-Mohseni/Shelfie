@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './MacronutrientAnalyzer.css'; // Ensure you style the menu as needed
+import { Link } from 'react-router-dom';
 
 const MacronutrientAnalyzer = () => {
   const [foodData, setFoodData] = useState([]);
@@ -122,6 +123,32 @@ const MacronutrientAnalyzer = () => {
     setDisplayedResults(prev => prev + 10);
   };
 
+  const activateFilters = () => {
+    setCategoryFilters({
+      'American Indian': true,
+      'Baby Foods': true,
+      'Baked Foods': true,
+      Beverages: true,
+      'Beans and Lentils': true,
+      'Breakfast Cereals': true,
+      'Dairy and Egg Products': true,
+      'Fast Foods': true,
+      Fish: true,
+      Fruits: true,
+      'Fats and Oils': true,
+      'Grains and Pasta': true,
+      Meats: true,
+      'Nuts and Seeds': true,
+      'Prepared Meals': true,
+      'Restaurant Foods': true,
+      Snacks: true,
+      'Soups and Sauces': true,
+      Sweets: true,
+      'Spices and Herbs': true,
+      Vegetables: true 
+    });
+
+  }
   // Reset all filters
   const resetFilters = () => {
     setCategoryFilters({
@@ -148,6 +175,7 @@ const MacronutrientAnalyzer = () => {
       Vegetables: false
     });
   };
+  const [selectedPreset, setSelectedPreset] = useState('');
 
 
   useEffect(() => {
@@ -195,11 +223,76 @@ const MacronutrientAnalyzer = () => {
         return 'gray';
     }
   };
+  const applyPreset = (preset) => {
+    setSelectedPreset(preset);
+    let newFilters = Object.fromEntries(
+      Object.keys(categoryFilters).map(key => [key, false])
+    );
+    
+    switch(preset) {
+      case 'vegan':
+        newFilters = {
+          ...newFilters,
+          'Dairy and Egg Products': true,
+          'Fish': true,
+          'Meats': true
+        };
+        break;
+      case 'vegetarian':
+        newFilters = {
+          ...newFilters,
+          'Fish': true,
+          'Meats': true
+        };
+        break;
+      case 'paleo':
+        newFilters = {
+          ...newFilters,
+          'Dairy and Egg Products': true,
+          'Grains and Pasta': true,
+          'Baked Foods': true,
+          'Sweets': true,
+          'Prepared Meals': true,
+          'Fast Foods': true
+        };
+        break;
+      case 'keto':
+        newFilters = {
+          ...newFilters,
+          'Grains and Pasta': true,
+          'Fruits': true,
+          'Sweets': true
+        };
+        break;
+      default:
+        break;
+    }
+    
+    setCategoryFilters(newFilters);
+  };
 
   return (
     <div className="analyzer-container">
+      <Link to="/" className="home-button">Home</Link>
       <div className="menu-panel">
         <h2>Filters</h2>
+        <div className="presets-filters">
+          <h3>Dietary Presets</h3>
+          <div className="preset-options">
+            {['vegan', 'vegetarian', 'paleo', 'keto'].map(preset => (
+              <label key={preset} className="preset-label">
+                <input
+                  type="radio"
+                  name="preset"
+                  value={preset}
+                  checked={selectedPreset === preset}
+                  onChange={() => applyPreset(preset)}
+                />
+                {preset.charAt(0).toUpperCase() + preset.slice(1)}
+              </label>
+            ))}
+          </div>
+        </div>
         <div className="filter-options">
           {/* Individual food category checkboxes */}
           {Object.keys(categoryFilters).map(category => (
@@ -213,6 +306,7 @@ const MacronutrientAnalyzer = () => {
             </label>
           ))}
         </div>
+        <button onClick={activateFilters}> Activate All Filters </button>{ /* Activate All Filters Button*/}
         <button onClick={resetFilters}>Reset Filters</button> {/* Reset button */}
       </div>
 

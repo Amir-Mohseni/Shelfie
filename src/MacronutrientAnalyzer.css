@@ -205,3 +205,39 @@
   text-align: center;
   font-weight: bold;
 }
+.preset-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.preset-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.preset-label input {
+  margin-right: 10px;
+}
+.home-button {
+  position: absolute;
+  top: 10px;
+  left: -100px;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.home-button:hover {
+  background-color: #0056b3;
+}
+
+.analyzer-container {
+  position: relative;
+  /* ... other existing styles ... */
+}
