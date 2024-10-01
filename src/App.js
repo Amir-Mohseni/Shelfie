@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import GroceryListApp from './GroceryListApp';
-import MacronutrientAnalyzer from './MacronutrientAnalyzer';
-import HomePage from './HomePage';
+import GroceryListApp from './components/GroceryList';
+import MacronutrientAnalyzer from './components/MacronutrientAnalyzer';
+import HomePage from './components/HomePage';
 
 function App() {
   return (
