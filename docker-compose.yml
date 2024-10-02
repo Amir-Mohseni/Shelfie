@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  backend:
+    build:
+      context: ./src # Path to your Flask app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ../public:/app/public  # Mount the public directory to /app/public in the container
+  
+  frontend:
+    build: 
+      context: .
+    ports:
+      - "3000:3000"
