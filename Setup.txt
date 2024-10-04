@@ -5,6 +5,9 @@ This is an installation guide for our IUI project
 2. git checkout AI 
 
 Download npm 
+  For most platforms: 
+    https://nodejs.org/en/download/prebuilt-installer
+
 
 3. npm install react-scripts
 
