@@ -1,0 +1,30 @@
+This is an installation guide for our IUI project
+
+1. git clone https://github.com/Amir-Mohseni/grocery-list-app.git 
+
+2. git checkout AI 
+
+Download npm 
+
+3. npm install react-scripts
+
+
+! Make sure you have python installed
+
+4. cd src 
+
+
+5. python grocery_server.py or python3 grocery_server.py 
+
+6. pip install flask flask_cors flask-sqlalchemy flask-jwt-extended numpy scikit-learn pandas 
+
+! Install any other remaining packets like shown above, this should cover most people
+
+7. python or python3 grocery_server.py 
+8. python or python3 food_rater.py 
+9. npm start 
+
+
+! There may be some additional steps that you should take to configure it 
+on your own device but this should bring most people to a functional state,
+the browser will open on its own when you execute the last commnand
