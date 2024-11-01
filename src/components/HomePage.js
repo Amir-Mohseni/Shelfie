@@ -10,10 +10,6 @@ const HomePage = () => {
       <div className="split left" onClick={() => navigate('/grocery')}>
         <h2>Grocery List App</h2>
       </div>
-
-      <div className="split right" onClick={() => navigate('/analyzer')}>
-        <h2>Macronutrient Analyzer</h2>
-      </div>
     </div>
   );
 };

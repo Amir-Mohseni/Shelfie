@@ -14,11 +14,13 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "dev": "concurrently \"npm:start\" \"npm:backend\"",
     "start": "react-scripts start",
+    "backend": "cd src/backend && FLASK_APP=app.py flask run",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
-  },
+  }, 
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -39,7 +41,9 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.45",
-    "tailwindcss": "^3.4.10"
+    "concurrently": "^9.0.1",
+    "gh-pages": "^6.2.0",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14"
   }
 }

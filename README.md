@@ -1,70 +1,176 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Grocery List App
+
+This project is a full-stack Grocery List app built with a React frontend and a Flask backend. The frontend is bootstrapped with [React App](https://github.com/facebook/create-react-app), and the backend provides API endpoints for user authentication and data management using Flask, SQLAlchemy, and Flask-JWT-Extended.
+
+## Features
+
+- User Authentication (Login and Signup)
+- Item categorization using machine learning
+- Real-time prediction of grocery item categories
+- Intuitive and responsive UI
+- Persistence using SQLite database
+
+## Prerequisites
+
+- **Node.js** (v14 or higher)
+- **Python** (v3.8 or higher)
+- **pip** (Python package installer)
+
+## Installation Guide
+
+To streamline the setup process, you can use the provided `setup.sh` script to automatically install dependencies and start the project.
+
+### Using the Setup Script
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/Amir-Mohseni/grocery-list-app.git
+   cd grocery-list-app
+   ```
+
+2. Run the setup script:
+
+   ```bash
+   bash setup.sh
+   ```
+
+   This script will:
+   - Install Node.js dependencies
+   - Set up the Python virtual environment and install Python dependencies
+   - Start both the frontend and backend servers concurrently
+
+### Manual Setup
+
+If you prefer to install dependencies manually, follow these steps.
+
+#### 1. Install Node.js Dependencies
+
+In the project root, run:
+
+```bash
+npm install
+```
+
+#### 2. Install Python Dependencies
+
+1. Navigate to the backend directory:
+
+   ```bash
+   cd src/backend
+   ```
+
+2. Create and activate a virtual environment:
+
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows, use venv\Scripts\activate
+   ```
+
+3. Install Python packages:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+#### 3. Run the Project
+
+To start both the frontend and backend servers, run:
+
+```bash
+npm run dev
+```
+
+- The React frontend will be available at [http://localhost:3000](http://localhost:3000).
+- The Flask backend will be available at [http://localhost:5000](http://localhost:5000).
 
 ## Available Scripts
 
 In the project directory, you can run:
 
-### `npm start`
+### `npm run dev`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Runs both the React frontend and Flask backend concurrently in development mode.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### `npm run start`
 
-### `npm test`
+Runs only the React frontend in development mode. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### `npm run backend`
+
+Runs only the Flask backend on [http://localhost:5000](http://localhost:5000).
 
 ### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Builds the React app for production to the `build` folder. The build is optimized for the best performance.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Directory Structure
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- **src**: Contains all source code.
+  - **src/frontend**: React frontend.
+  - **src/backend**: Flask backend.
+- **public**: Static assets for the frontend.
+- **requirements.txt**: Python dependencies for the backend.
+- **setup.sh**: Shell script to set up and start the project.
 
-### `npm run eject`
+## Troubleshooting
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- Ensure you have installed all dependencies for both the frontend and backend.
+- If there are issues with styles, verify that Tailwind CSS is installed and configured correctly in the frontend.
 
 ## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+To learn more about the tools used in this project:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- [React Documentation](https://reactjs.org/)
+- [Flask Documentation](https://flask.palletsprojects.com/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/)
 
-### Code Splitting
+## License
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+This project is licensed under the MIT License. See the LICENSE file for details.
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## `setup.sh` (Installation Script)
 
-### Making a Progressive Web App
+This script simplifies the setup process by installing all necessary dependencies and starting both the frontend and backend servers.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```bash
+#!/bin/bash
 
-### Advanced Configuration
+echo "Setting up the Grocery List App..."
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+# Install Node.js dependencies
+echo "Installing Node.js dependencies..."
+npm install
 
-### Deployment
+# Set up Python virtual environment and install dependencies
+echo "Setting up Python environment and installing dependencies..."
+cd src/backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cd ../../
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+# Start both frontend and backend servers
+echo "Starting both frontend and backend servers..."
+npm run dev
+```
 
-### `npm run build` fails to minify
+### Instructions for Using `setup.sh`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+1. Make the script executable:
+
+   ```bash
+   chmod +x setup.sh
+   ```
+
+2. Run the script:
+
+   ```bash
+   ./setup.sh
+   ```
+
+This will install dependencies and start both servers.

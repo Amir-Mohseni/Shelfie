@@ -6,7 +6,7 @@ body, html {
 
 .split {
   height: 100vh;
-  width: 50%;
+  width: 100%; /* Full width now */
   position: fixed;
   top: 0;
   overflow: hidden;
@@ -28,16 +28,11 @@ body, html {
   background-image: url('./list.png'); /* Ensure this image is in your public folder */
 }
 
-.right {
-  right: 0;
-  background-image: url('./scorer.png'); /* Ensure this image is in your public folder */
-}
-
 .split:hover {
   opacity: 0.8;
 }
 
-.left h2, .right h2 {
+.left h2 {
   background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
   padding: 10px;
   border-radius: 5px;

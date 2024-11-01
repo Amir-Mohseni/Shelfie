@@ -1,8 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import GroceryListApp from './components/GroceryList';
-import MacronutrientAnalyzer from './components/MacronutrientAnalyzer';
-import HomePage from './components/HomePage';
+import HomePage from './components/HomePage'; // Remove the MacronutrientAnalyzer import
 
 function App() {
   return (
@@ -10,7 +9,6 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/grocery" element={<GroceryListApp />} />
-        <Route path="/analyzer" element={<MacronutrientAnalyzer />} />
       </Routes>
     </Router>
   );
