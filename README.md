@@ -11,7 +11,7 @@ This project is a full-stack Grocery List app with an intelligent interface desi
 - **Real-Time Predictions**: The app responds in real-time, offering immediate categorization suggestions without delays.
 - **Personalized Learning**: The AI model adapts over time, learning from user overrides to improve future predictions.
 
-![AI-Integrated Version Screenshot](./report/AI.png){ width=50% }
+<img src="./report/AI.png" alt="AI-Integrated Version Screenshot" width="400">
 
 ## Project Methodology
 
