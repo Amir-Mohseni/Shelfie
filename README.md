@@ -10,9 +10,8 @@ This project is a full-stack Grocery List app with an intelligent interface desi
 - **Flexible Categorization Options**: Users can override AI predictions and manually assign items to categories, providing control over the categorization process.
 - **Real-Time Predictions**: The app responds in real-time, offering immediate categorization suggestions without delays.
 - **Personalized Learning**: The AI model adapts over time, learning from user overrides to improve future predictions.
-- **Usability and Flexibility**: Supports flexibility principles, such as dialog initiative, multi-threading, and task migratability, allowing users to switch between AI-driven and manual modes.
 
-![AI-Integrated Version Screenshot](./report/AI.png)
+![AI-Integrated Version Screenshot](./report/AI.png){width=400px}
 
 ## Project Methodology
 
