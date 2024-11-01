@@ -1,70 +1,191 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Grocery List App
+
+This project is a full-stack Grocery List app with an intelligent interface designed to enhance the grocery shopping experience. It features a React frontend and a Flask backend. The app not only allows users to create and manage grocery lists but also leverages AI to predict item categories, making the process efficient and personalized.
+
+## Features
+
+- **User Authentication**: Provides secure login and signup functionality.
+- **AI-Driven Categorization**: Automatically predicts the category for each grocery item as you type, helping users organize items faster.
+- **Flexible Categorization Options**: Users can override AI predictions and manually assign items to categories, providing control over the categorization process.
+- **Real-Time Predictions**: The app responds in real-time, offering immediate categorization suggestions without delays.
+- **Personalized Learning**: The AI model adapts over time, learning from user overrides to improve future predictions.
+- **Usability and Flexibility**: Supports flexibility principles, such as dialog initiative, multi-threading, and task migratability, allowing users to switch between AI-driven and manual modes.
+
+![AI-Integrated Version Screenshot](./report/AI.png)
+
+## Project Methodology
+
+This project was developed in phases to ensure a user-centered design:
+
+1. **Requirement Extraction**: Based on a survey of 16 participants, mostly university students and postgraduates, essential features were identified, such as quick item entry, effective categorization, and AI-driven suggestions. 
+   
+2. **Low-Fidelity Prototype**: A low-fidelity prototype was created to visualize the main interactions and functionalities, providing a foundation for design decisions.
+
+3. **Hard-Coded Baseline Version**: A non-AI version was first developed, allowing users to manually assign categories. This version established a baseline for comparison with the AI-enhanced version.
+
+4. **AI Integration**: A logistic regression model, enhanced with Word2Vec embeddings, was integrated to predict item categories. The model is retrained based on user behavior, allowing it to adapt to individual preferences.
+
+5. **User Testing**: A user study with 12 participants tested both versions of the app. The AI-enabled version significantly reduced task completion time and improved user satisfaction.
+
+## Key Results from User Testing
+
+- **Task Completion Time**: The AI-enabled version reduced task completion time by 40-50% compared to the manual version.
+- **User Emotions**: Positive emotions like satisfaction, confidence, and interest increased significantly, while negative emotions like frustration and boredom decreased.
+- **Flexibility**: The AI-enabled app effectively supported flexibility, allowing users to override predictions, control categorization, and personalize the experience.
+
+![Comparison of User Emotions](./report/ekman_emotions_comparison.png) <!-- Example image inclusion for visual context -->
+
+## Installation Guide
+
+To streamline the setup process, you can use the provided `setup.sh` script to install dependencies and start the project.
+
+### Using the Setup Script
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/Amir-Mohseni/grocery-list-app.git
+   cd grocery-list-app
+   ```
+
+2. Run the setup script:
+
+   ```bash
+   bash setup.sh
+   ```
+
+   This script will:
+   - Install Node.js dependencies
+   - Set up the Python virtual environment and install Python dependencies
+   - Start both the frontend and backend servers concurrently
+
+### Manual Setup
+
+If you prefer to install dependencies manually, follow these steps.
+
+#### 1. Install Node.js Dependencies
+
+In the project root, run:
+
+```bash
+npm install
+```
+
+#### 2. Install Python Dependencies
+
+1. Navigate to the backend directory:
+
+   ```bash
+   cd src/backend
+   ```
+
+2. Create and activate a virtual environment:
+
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows, use venv\Scripts\activate
+   ```
+
+3. Install Python packages:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+#### 3. Run the Project
+
+To start both the frontend and backend servers, run:
+
+```bash
+npm run dev
+```
+
+- The React frontend will be available at [http://localhost:3000](http://localhost:3000).
+- The Flask backend will be available at [http://localhost:5000](http://localhost:5000).
 
 ## Available Scripts
 
 In the project directory, you can run:
 
-### `npm start`
+### `npm run dev`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Runs both the React frontend and Flask backend concurrently in development mode.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### `npm run start`
 
-### `npm test`
+Runs only the React frontend in development mode. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### `npm run backend`
 
-### `npm run build`
+Runs only the Flask backend on [http://localhost:5000](http://localhost:5000).
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Directory Structure
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- **src**: Contains all source code.
+  - **src/backend**: Flask backend.
+- **public**: Static assets for the frontend.
+- **requirements.txt**: Python dependencies for the backend.
+- **setup.sh**: Shell script to set up and start the project.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Future Improvements
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+1. **Immersive Communication Technologies**: Augmented Reality (AR) could guide users to specific aisles in a grocery store, enhancing in-store navigation.
+2. **Explainability Features**: A history section that displays the model's predictions and category probabilities can improve transparency and build user trust.
+3. **Enhanced AI Capabilities**: Further training with diverse datasets and improved embeddings can boost the AI's prediction accuracy and adaptability.
 
 ## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+To learn more about the tools used in this project:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- [React Documentation](https://reactjs.org/)
+- [Flask Documentation](https://flask.palletsprojects.com/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/)
 
-### Code Splitting
+## License
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+This project is licensed under the MIT License. See the LICENSE file for details.
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## `setup.sh` (Installation Script)
 
-### Making a Progressive Web App
+This script simplifies the setup process by installing all necessary dependencies and starting both the frontend and backend servers.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```bash
+#!/bin/bash
 
-### Advanced Configuration
+echo "Setting up the Grocery List App..."
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+# Install Node.js dependencies
+echo "Installing Node.js dependencies..."
+npm install
 
-### Deployment
+# Set up Python virtual environment and install dependencies
+echo "Setting up Python environment and installing dependencies..."
+cd src/backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cd ../../
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+# Start both frontend and backend servers
+echo "Starting both frontend and backend servers..."
+npm run dev
+```
 
-### `npm run build` fails to minify
+### Instructions for Using `setup.sh`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+1. Make the script executable:
+
+   ```bash
+   chmod +x setup.sh
+   ```
+
+2. Run the script:
+
+   ```bash
+   ./setup.sh
+   ```
+
+This will install dependencies and start both servers.

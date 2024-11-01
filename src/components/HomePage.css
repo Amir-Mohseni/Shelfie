@@ -1,0 +1,45 @@
+body, html {
+  height: 100%;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.split {
+  height: 100vh;
+  width: 100%; /* Full width now */
+  position: fixed;
+  top: 0;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Aligns text to the top */
+  cursor: pointer;
+  color: white;
+  text-align: center;
+  font-size: 24px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding-top: 40px; /* Adds some space from the top */
+}
+
+.left {
+  left: 0;
+  background-image: url('./list.png'); /* Ensure this image is in your public folder */
+}
+
+.split:hover {
+  opacity: 0.8;
+}
+
+.left h2 {
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  padding: 10px;
+  border-radius: 5px;
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Text shadow for extra clarity */
+  position: relative;
+  top: -10px; /* Further moves text up */
+}

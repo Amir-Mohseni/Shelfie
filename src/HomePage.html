@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Split Page with Images</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .split {
+            height: 100%;
+            width: 100%; /* Set width to 100% since there's only one button */
+            position: fixed;
+            top: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: white;
+            text-align: center;
+            font-size: 24px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .left {
+            left: 0;
+            background-image: url('list.png'); /* Background for left button */
+        }
+        .split:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="split left" onclick="window.location.href='http://localhost:3000'">
+    </div>
+
+</body>
+</html>

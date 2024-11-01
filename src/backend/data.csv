@@ -1,0 +1,226 @@
+Item,Category
+apple,Produce
+banana,Produce
+orange,Produce
+lettuce,Produce
+carrot,Produce
+broccoli,Produce
+tomato,Produce
+spinach,Produce
+grapes,Produce
+pear,Produce
+kiwi,Produce
+mango,Produce
+strawberry,Produce
+blueberry,Produce
+zucchini,Produce
+cucumber,Produce
+avocado,Produce
+chicken,Meat & Seafood
+beef,Meat & Seafood
+pork,Meat & Seafood
+salmon,Meat & Seafood
+tuna,Meat & Seafood
+shrimp,Meat & Seafood
+crab,Meat & Seafood
+steak,Meat & Seafood
+lamb,Meat & Seafood
+bacon,Meat & Seafood
+sardines,Meat & Seafood
+trout,Meat & Seafood
+tilapia,Meat & Seafood
+cod,Meat & Seafood
+turkey breast,Meat & Seafood
+duck,Meat & Seafood
+lobster,Meat & Seafood
+milk,Dairy & Eggs
+cheese,Dairy & Eggs
+yogurt,Dairy & Eggs
+butter,Dairy & Eggs
+eggs,Dairy & Eggs
+cream,Dairy & Eggs
+sour cream,Dairy & Eggs
+ice cream,Dairy & Eggs
+buttermilk,Dairy & Eggs
+cottage cheese,Dairy & Eggs
+whipped cream,Dairy & Eggs
+ghee,Dairy & Eggs
+feta cheese,Dairy & Eggs
+goat cheese,Dairy & Eggs
+ricotta,Dairy & Eggs
+cream cheese,Dairy & Eggs
+bread,Bakery
+bagel,Bakery
+croissant,Bakery
+muffin,Bakery
+cake,Bakery
+cookie,Bakery
+donut,Bakery
+brownie,Bakery
+brioche,Bakery
+pita,Bakery
+ciabatta,Bakery
+sourdough,Bakery
+biscuit,Bakery
+waffle,Bakery
+crackers,Bakery
+pastry,Bakery
+flour,Pantry
+sugar,Pantry
+salt,Pantry
+pepper,Pantry
+oil,Pantry
+vinegar,Pantry
+pasta sauce,Pantry
+peanut butter,Pantry
+honey,Pantry
+soy sauce,Pantry
+tomato paste,Pantry
+oats,Pantry
+rice,Pantry
+cereal,Pantry
+spices,Pantry
+herbs,Pantry
+yeast,Pantry
+canned tuna,Pantry
+frozen pizza,Frozen Foods
+frozen vegetables,Frozen Foods
+ice cream,Frozen Foods
+frozen fries,Frozen Foods
+frozen chicken wings,Frozen Foods
+frozen fish,Frozen Foods
+frozen berries,Frozen Foods
+frozen waffles,Frozen Foods
+frozen dinners,Frozen Foods
+frozen peas,Frozen Foods
+frozen spinach,Frozen Foods
+frozen shrimp,Frozen Foods
+soda,Beverages
+juice,Beverages
+water,Beverages
+coffee,Beverages
+tea,Beverages
+wine,Beverages
+beer,Beverages
+energy drink,Beverages
+milkshake,Beverages
+sports drink,Beverages
+smoothie,Beverages
+sparkling water,Beverages
+lemonade,Beverages
+iced tea,Beverages
+hot chocolate,Beverages
+chips,Snacks
+popcorn,Snacks
+chocolate bar,Snacks
+candy,Snacks
+cookies,Snacks
+pretzels,Snacks
+crackers,Snacks
+granola bars,Snacks
+nuts,Snacks
+trail mix,Snacks
+beef jerky,Snacks
+fruit snacks,Snacks
+cheese puffs,Snacks
+rice cakes,Snacks
+dried fruit,Snacks
+protein bars,Snacks
+toothpaste,Personal Care
+shampoo,Personal Care
+soap,Personal Care
+deodorant,Personal Care
+lotion,Personal Care
+toothbrush,Personal Care
+conditioner,Personal Care
+razor,Personal Care
+makeup,Personal Care
+hand sanitizer,Personal Care
+face wash,Personal Care
+body wash,Personal Care
+mouthwash,Personal Care
+shaving cream,Personal Care
+nail polish,Personal Care
+facial tissue,Personal Care
+detergent,Household
+dish soap,Household
+paper towels,Household
+toilet paper,Household
+cleaning spray,Household
+trash bags,Household
+batteries,Household
+light bulbs,Household
+aluminum foil,Household
+plastic wrap,Household
+sponges,Household
+cleaning wipes,Household
+bleach,Household
+air freshener,Household
+dog food,Pet Supplies
+cat food,Pet Supplies
+bird seed,Pet Supplies
+cat litter,Pet Supplies
+dog leash,Pet Supplies
+dog treats,Pet Supplies
+pet shampoo,Pet Supplies
+aquarium filter,Pet Supplies
+fish food,Pet Supplies
+dog collar,Pet Supplies
+hamster bedding,Pet Supplies
+rabbit pellets,Pet Supplies
+cat scratcher,Pet Supplies
+dog bed,Pet Supplies
+deli meat,Deli
+cheese slices,Deli
+sandwich meat,Deli
+salami,Deli
+ham,Deli
+turkey,Deli
+bologna,Deli
+roast beef,Deli
+prosciutto,Deli
+pepperoni,Deli
+pastrami,Deli
+chorizo,Deli
+mortadella,Deli
+ketchup,Condiments & Sauces
+mustard,Condiments & Sauces
+mayonnaise,Condiments & Sauces
+bbq sauce,Condiments & Sauces
+soy sauce,Condiments & Sauces
+hot sauce,Condiments & Sauces
+ranch dressing,Condiments & Sauces
+salad dressing,Condiments & Sauces
+pesto,Condiments & Sauces
+tartar sauce,Condiments & Sauces
+hoisin sauce,Condiments & Sauces
+sriracha,Condiments & Sauces
+tahini,Condiments & Sauces
+vinaigrette,Condiments & Sauces
+olive tapenade,Canned Goods
+canned beans,Canned Goods
+canned corn,Canned Goods
+canned tomatoes,Canned Goods
+canned soup,Canned Goods
+canned tuna,Canned Goods
+canned peas,Canned Goods
+canned chili,Canned Goods
+canned mushrooms,Canned Goods
+canned pineapple,Canned Goods
+canned peaches,Canned Goods
+canned carrots,Canned Goods
+canned olives,Pasta & Grains
+pasta,Pasta & Grains
+rice,Pasta & Grains
+quinoa,Pasta & Grains
+couscous,Pasta & Grains
+barley,Pasta & Grains
+oats,Pasta & Grains
+polenta,Pasta & Grains
+macaroni,Pasta & Grains
+spaghetti,Pasta & Grains
+fettuccine,Pasta & Grains
+bulgur,Pasta & Grains
+brown rice,Pasta & Grains
+wild rice,Pasta & Grains
+noodles,Pasta & Grains
