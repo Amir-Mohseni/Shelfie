@@ -33,7 +33,7 @@ This project was developed in phases to ensure a user-centered design:
 - **User Emotions**: Positive emotions like satisfaction, confidence, and interest increased significantly, while negative emotions like frustration and boredom decreased.
 - **Flexibility**: The AI-enabled app effectively supported flexibility, allowing users to override predictions, control categorization, and personalize the experience.
 
-![Comparison of User Emotions](./report/ekman_model.png) <!-- Example image inclusion for visual context -->
+<img src="./report/ekman_model.png" alt="Comparison of User Emotions" width="400">
 
 ## Installation Guide
 
