@@ -1,7 +1,7 @@
 
-# Grocery List App
+# Shelfie: The AI-powered Grocery List App
 
-This project is a full-stack Grocery List app with an intelligent interface designed to enhance the grocery shopping experience. It features a React frontend and a Flask backend. The app not only allows users to create and manage grocery lists but also leverages AI to predict item categories, making the process efficient and personalized.
+Shelfie is a full-stack Grocery List app with an intelligent interface designed to enhance the grocery shopping experience. It features a React frontend and a Flask backend. The app not only allows users to create and manage grocery lists but also leverages AI to predict item categories, making the process efficient and personalized.
 
 ## Features
 
@@ -44,8 +44,8 @@ To streamline the setup process, you can use the provided `setup.sh` script to i
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/Amir-Mohseni/grocery-list-app.git
-   cd grocery-list-app
+   git clone https://github.com/Amir-Mohseni/Shelfie.git
+   cd Shelfie
    ```
 
 2. Run the setup script:
@@ -154,7 +154,7 @@ This script simplifies the setup process by installing all necessary dependencie
 ```bash
 #!/bin/bash
 
-echo "Setting up the Grocery List App..."
+echo "Setting up Shelfie..."
 
 # Install Node.js dependencies
 echo "Installing Node.js dependencies..."
